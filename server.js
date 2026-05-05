@@ -226,8 +226,8 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ OvoWorks running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ OvoWorks running at http://0.0.0.0:${PORT}`);
   console.log(`📊 Live data: CoinGecko + SoSoValue Terminal`);
   console.log(`🤖 AI: Claude Sonnet 4.6`);
 });
