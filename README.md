@@ -6,12 +6,12 @@
 ![Claude](https://img.shields.io/badge/AI-Claude%20Sonnet%204.6-black?style=for-the-badge)
 ![Railway](https://img.shields.io/badge/Deployed-Railway-purple?style=for-the-badge)
 
-## Live Demo
+## 🌐 Live Demo
 **[ovoworks-onchain-copilot-production.up.railway.app](https://ovoworks-onchain-copilot-production.up.railway.app)**
 
 ---
 
-## What is OvoWorks?
+## 📖 What is OvoWorks?
 
 OvoWorks is an AI-powered OnChain Finance Copilot that gives anyone instant, plain-English financial intelligence powered by live market data.
 
@@ -24,7 +24,7 @@ OvoWorks responds with real, specific, data-driven insights in seconds — power
 
 ---
 
-## How It Works
+## 🧠 How It Works
 User Question
 ↓
 Fetch Live Data (SoSoValue + CoinGecko)
@@ -32,9 +32,10 @@ Fetch Live Data (SoSoValue + CoinGecko)
 Inject into Claude Sonnet 4.6
 ↓
 Plain English Answer with Real Numbers
+
 ---
 
-## Data Sources
+## 📊 Data Sources
 
 | Source | Data |
 |--------|------|
@@ -44,7 +45,7 @@ Plain English Answer with Real Numbers
 
 ---
 
-## Tech Stack
+## 🏗️ Tech Stack
 
 - **Backend:** Node.js + Express
 - **AI:** Claude Sonnet 4.6 (Anthropic)
@@ -54,7 +55,7 @@ Plain English Answer with Real Numbers
 
 ---
 
-## Run Locally
+## 🚀 Run Locally
 
 ### Prerequisites
 - Node.js installed
@@ -89,24 +90,24 @@ Open `http://localhost:3000` in your browser.
 
 ---
 
-## Implementation Roadmap
+## 🗺️ Roadmap
 
 | Wave | Focus | Status |
 |------|-------|--------|
-| Wave 1 | Concept, UI, AI brain, live data, deployment | Completed |
-
-| Wave 2 | SoDEX integration, portfolio tracker, ETF charts | May 18 |
-
-| Wave 3 | Full polish, alerts, mobile UI, final demo | Jun 4 |
+| Wave 1 | Concept, UI, AI brain, live data, deployment | ✅ Complete |
+| Wave 2 | SoDEX integration, portfolio tracker, ETF charts | 🔜 May 18 |
+| Wave 3 | Full polish, alerts, mobile UI, final demo | 🔜 Jun 4 |
 
 ---
 
-## Disclaimer
+## ⚠️ Disclaimer
 
 OvoWorks provides data-driven market intelligence for informational purposes only. Nothing here constitutes financial advice. Always do your own research before making investment decisions.
 
 ---
 
-## Built for SoSoValue Buildathon 2026
+## 🏆 Built for SoSoValue Buildathon 2026
 
-Built on SoSoValue's one-stop infrastructure: Terminal API, SoDEX, and ValueChain, as part of the SoSoValue x Akindo Buildathon 2026.
+Built on SoSoValue's one-stop infrastructure — Terminal API, SoDEX, and ValueChain — as part of the SoSoValue x Akindo Buildathon 2026.
+
+> *"Build Your One-Person On-Chain Finance Business"*
