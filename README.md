@@ -20,7 +20,7 @@ Ask it anything:
 - *"Give me a crypto market brief for today"*
 - *"Should I be looking at ETH right now?"*
 
-OvoWorks responds with real, specific, data-driven insights in seconds — powered by live SoSoValue data and Claude AI.
+OvoWorks responds with real, specific, data-driven insights in seconds, powered by live SoSoValue data and Claude AI.
 
 ---
 
@@ -108,6 +108,6 @@ OvoWorks provides data-driven market intelligence for informational purposes onl
 
 ## 🏆 Built for SoSoValue Buildathon 2026
 
-Built on SoSoValue's one-stop infrastructure — Terminal API, SoDEX, and ValueChain — as part of the SoSoValue x Akindo Buildathon 2026.
+Built on SoSoValue's one-stop infrastructure: Terminal API, SoDEX, and ValueChain as part of the SoSoValue x Akindo Buildathon 2026.
 
 > *"Build Your One-Person On-Chain Finance Business"*
