@@ -259,6 +259,346 @@
   .send-btn:hover { opacity: 0.85; }
   .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+  .signal-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F4845F, #c45a35);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.signal-btn:hover { opacity: 0.85; }
+
+.signal-panel {
+  background: #1a0a00;
+  border-top: 1px solid #F4845F;
+  padding: 16px 20px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.signal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.signal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F4845F;
+  letter-spacing: 0.5px;
+}
+
+.signal-close {
+  cursor: pointer;
+  color: #a06040;
+  font-size: 14px;
+}
+
+.signal-close:hover { color: #FFF5EE; }
+
+.signal-cards {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.signal-card {
+  flex: 1;
+  min-width: 80px;
+  background: #120600;
+  border: 1px solid #3D1F0A;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.signal-card-label {
+  font-size: 10px;
+  color: #a06040;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.signal-card-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #FFF5EE;
+}
+
+.signal-card-value.buy { color: #1D9E75; }
+.signal-card-value.sell { color: #E24B4A; }
+.signal-card-value.hold { color: #F4845F; }
+
+.signal-action {
+  font-size: 13px;
+  color: #c8a882;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #120600;
+  border-radius: 8px;
+  border-left: 3px solid #F4845F;
+}
+
+.sodex-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #F4845F, #c45a35);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.sodex-btn:hover { opacity: 0.85; }
+
+.signal-loading {
+  text-align: center;
+  padding: 16px;
+  color: #a06040;
+  font-size: 13px;
+}
+
+.history-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3D1F0A;
+  border: 1px solid #F4845F;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.history-btn:hover { opacity: 0.85; }
+
+.history-panel {
+  background: #1a0a00;
+  border-top: 1px solid #3D1F0A;
+  padding: 16px 20px;
+  max-height: 280px;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+.history-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #3D1F0A;
+  padding-bottom: 8px;
+}
+
+.history-tab {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #120600;
+  color: #a06040;
+}
+
+.history-tab.active {
+  background: #F4845F;
+  color: white;
+}
+
+.history-close {
+  margin-left: auto;
+  cursor: pointer;
+  color: #a06040;
+  font-size: 14px;
+  background: none;
+  border: none;
+}
+
+.history-close:hover { color: #FFF5EE; }
+
+.history-empty {
+  text-align: center;
+  padding: 20px;
+  color: #a06040;
+  font-size: 13px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #120600;
+  margin-bottom: 6px;
+  border: 1px solid #3D1F0A;
+}
+
+.history-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.history-badge.BUY { background: #0f2d22; color: #1D9E75; }
+.history-badge.SELL { background: #2d0f0f; color: #E24B4A; }
+.history-badge.HOLD { background: #2d1a0a; color: #F4845F; }
+
+.history-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-info-top {
+  font-size: 12px;
+  color: #FFF5EE;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-info-bottom {
+  font-size: 11px;
+  color: #a06040;
+  margin-top: 2px;
+}
+
+.history-meta {
+  font-size: 11px;
+  color: #a06040;
+  text-align: right;
+  flex-shrink: 0;
+}
+.chart-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3D1F0A;
+  border: 1px solid #F4845F;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.chart-btn:hover { opacity: 0.85; }
+
+.chart-panel {
+  background: #1a0a00;
+  border-top: 1px solid #3D1F0A;
+  padding: 16px 20px;
+  animation: slideUp 0.3s ease;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F4845F;
+}
+
+.chart-close {
+  cursor: pointer;
+  color: #a06040;
+  font-size: 14px;
+  background: none;
+  border: none;
+  color: #a06040;
+}
+
+.chart-close:hover { color: #FFF5EE; }
+
+.chart-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chart-tab {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #120600;
+  color: #a06040;
+}
+
+.chart-tab.active {
+  background: #F4845F;
+  color: white;
+}
+
+.chart-container {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+.chart-loading {
+  text-align: center;
+  padding: 20px;
+  color: #a06040;
+  font-size: 13px;
+}
+
+.chart-summary {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chart-summary-card {
+  flex: 1;
+  background: #120600;
+  border: 1px solid #3D1F0A;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.chart-summary-label {
+  font-size: 10px;
+  color: #a06040;
+  margin-bottom: 3px;
+}
+
+.chart-summary-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFF5EE;
+}
+
+.chart-summary-value.positive { color: #1D9E75; }
+.chart-summary-value.negative { color: #E24B4A; }
+
   .footer {
     text-align: center;
     padding: 8px;
@@ -266,7 +606,104 @@
     color: #3D1F0A;
     background: #1a0a00;
   }
+
+  .source-tag + .source-tag {
+  margin-left: 4px;
+}
+
+.trade-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background: #120600;
+  border-radius: 10px;
+  border: 1px solid #3D1F0A;
+}
+
+.trade-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.trade-select {
+  flex: 1;
+  background: #1a0a00;
+  border: 1px solid #3D1F0A;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #FFF5EE;
+  outline: none;
+}
+
+.trade-input {
+  flex: 1;
+  background: #1a0a00;
+  border: 1px solid #3D1F0A;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #FFF5EE;
+  outline: none;
+}
+
+.trade-input:focus, .trade-select:focus {
+  border-color: #F4845F;
+}
+
+.trade-side-btns {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.trade-side-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.trade-side-btn.buy {
+  background: #1D9E75;
+  color: white;
+}
+
+.trade-side-btn.sell {
+  background: #E24B4A;
+  color: white;
+}
+
+.trade-side-btn:hover { opacity: 0.85; }
+.trade-side-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.trade-result-success {
+  margin-top: 8px;
+  padding: 10px;
+  background: #0f2d22;
+  border: 1px solid #1D9E75;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #1D9E75;
+}
+
+.trade-result-error {
+  margin-top: 8px;
+  padding: 10px;
+  background: #2d0f0f;
+  border: 1px solid #E24B4A;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #E24B4A;
+}
+
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -299,6 +736,42 @@
       </div>
     </div>
   </div>
+<!-- Signal Engine Panel -->
+<div class="signal-panel" id="signalPanel" style="display:none">
+  <div class="signal-header">
+    <span class="signal-title">⚡ Live Trade Signal</span>
+    <span class="signal-close" onclick="closeSignal()">✕</span>
+  </div>
+  <div class="signal-body" id="signalBody"></div>
+</div>
+
+<!-- ETF Chart Panel -->
+<div class="chart-panel" id="chartPanel" style="display:none">
+  <div class="chart-header">
+    <span class="chart-title">📊 ETF Flow History — 14 Days</span>
+    <button class="chart-close" onclick="closeChart()">✕</button>
+  </div>
+  <div class="chart-tabs">
+    <button class="chart-tab active" id="ctab-btc" onclick="switchChartTab('btc')">₿ Bitcoin ETF</button>
+    <button class="chart-tab" id="ctab-eth" onclick="switchChartTab('eth')">Ξ Ethereum ETF</button>
+  </div>
+  <div id="chartContent">
+    <div class="chart-container">
+      <canvas id="etfChart"></canvas>
+    </div>
+    <div class="chart-summary" id="chartSummary"></div>
+  </div>
+</div>
+
+<!-- History Panel -->
+<div class="history-panel" id="historyPanel" style="display:none">
+  <div class="history-tabs">
+    <button class="history-tab active" id="tab-signals" onclick="switchTab('signals')">📊 Signal History</button>
+    <button class="history-tab" id="tab-trades" onclick="switchTab('trades')">⚡ Trade History</button>
+    <button class="history-close" onclick="closeHistory()">✕</button>
+  </div>
+  <div id="historyContent"></div>
+</div>
 
   <div class="inputbar">
     <input
@@ -307,6 +780,21 @@
       placeholder="Ask OvoWorks anything about crypto markets..."
       onkeydown="if(event.key==='Enter') sendMsg()"
     />
+    <button class="signal-btn" onclick="generateSignal()" title="Generate trade signal">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+<button class="chart-btn" onclick="showETFChart()" title="ETF Flow Chart">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M3 3v18h18M7 16l4-4 4 4 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+<button class="history-btn" onclick="toggleHistory()" title="Trade history">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</button>
     <button class="send-btn" id="sendBtn" onclick="sendMsg()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -323,6 +811,7 @@
   const inputEl = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');
   let conversationHistory = [];
+const sessionId = 'session-' + Date.now();
 
   function addMsg(role, content, isHTML = false) {
     const div = document.createElement('div');
@@ -377,7 +866,7 @@
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory })
+        body: JSON.stringify({ messages: conversationHistory, sessionId: sessionId })
       });
 
       const data = await res.json();
@@ -385,10 +874,16 @@
       sendBtn.disabled = false;
 
       if (data.reply) {
-        conversationHistory.push({ role: 'assistant', content: data.reply });
-        const formatted = `<span class="source-tag">OVOWORKS · SOSOVALUE + CLAUDE AI</span><br/>` +
-          data.reply.replace(/\n/g, '<br/>');
-        addMsg('ai', formatted, true);
+  conversationHistory.push({ role: 'assistant', content: data.reply });
+  
+  // Build dynamic source tags
+  const sourceTags = data.sources && data.sources.length
+    ? data.sources.map(s => `<span class="source-tag">${s}</span>`).join(' ')
+    : '<span class="source-tag">OVOWORKS · CLAUDE AI</span>';
+
+  const formatted = `<div style="margin-bottom:8px">${sourceTags}</div>` +
+    data.reply.replace(/\n/g, '<br/>');
+  addMsg('ai', formatted, true);
       } else {
         addMsg('ai', '⚠️ Something went wrong. Please try again.');
       }
@@ -399,6 +894,366 @@
       addMsg('ai', '⚠️ Could not connect to server. Make sure the server is running.');
     }
   }
+
+  async function generateSignal() {
+  const panel = document.getElementById('signalPanel');
+  const body = document.getElementById('signalBody');
+  panel.style.display = 'block';
+  body.innerHTML = '<div class="signal-loading"><div class="typing"><span></span><span></span><span></span></div><br>Analysing live market data...</div>';
+
+  try {
+    const res = await fetch('/api/signal');
+    const data = await res.json();
+
+    if (data.signal) {
+      const s = data.signal;
+      const dirClass = s.direction.toLowerCase();
+      const sodexUrl = `https://testnet.sodex.com/trade?symbol=BTC_USDC&side=${s.direction}`;
+
+    body.innerHTML = `
+  <div class="signal-cards">
+    <div class="signal-card">
+      <div class="signal-card-label">SIGNAL</div>
+      <div class="signal-card-value ${dirClass}">${s.direction}</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-card-label">CONFIDENCE</div>
+      <div class="signal-card-value">${s.confidence}%</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-card-label">BTC PRICE</div>
+      <div class="signal-card-value">$${s.price}</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-card-label">ETF FLOW</div>
+      <div class="signal-card-value ${s.etfFlow > 0 ? 'buy' : 'sell'}">${s.etfFlow > 0 ? '+' : ''}$${s.etfFlow}M</div>
+    </div>
+  </div>
+  <div class="signal-action">${s.reasoning}</div>
+
+  <div class="trade-panel">
+    <div class="trade-row">
+      <select class="trade-select" id="tradeAsset">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="SOL">Solana (SOL)</option>
+      </select>
+      <input class="trade-input" type="number" id="tradeAmount" value="10" min="5" placeholder="USD Amount" />
+    </div>
+    <div class="trade-row">
+      <select class="trade-select" id="tradeLeverage">
+        <option value="0">Spot (No Leverage)</option>
+        <option value="3">3x Leverage</option>
+        <option value="5">5x Leverage</option>
+        <option value="10">10x Leverage</option>
+      </select>
+      <div class="trade-side-btns">
+        <button class="trade-side-btn buy" onclick="executeTrade('BUY', '${s.direction}')">⬆ BUY / LONG</button>
+        <button class="trade-side-btn sell" onclick="executeTrade('SELL', '${s.direction}')">⬇ SELL / SHORT</button>
+      </div>
+    </div>
+    <div id="tradeResult"></div>
+  </div>
+`;
+}
+  } catch (err) {
+    body.innerHTML = '<div class="signal-loading">⚠️ Could not generate signal. Try again.</div>';
+  }
+}
+
+function closeSignal() {
+  document.getElementById('signalPanel').style.display = 'none';
+}
+
+let historyVisible = false;
+let activeTab = 'signals';
+
+function toggleHistory() {
+  historyVisible = !historyVisible;
+  const panel = document.getElementById('historyPanel');
+  if (historyVisible) {
+    panel.style.display = 'block';
+    loadHistory();
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function closeHistory() {
+  historyVisible = false;
+  document.getElementById('historyPanel').style.display = 'none';
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  renderHistory();
+}
+
+let signalHistoryData = [];
+let tradeHistoryData = [];
+
+async function loadHistory() {
+  try {
+    const [sigRes, trdRes] = await Promise.all([
+      fetch('/api/signal/history'),
+      fetch('/api/trade/history')
+    ]);
+    const sigData = await sigRes.json();
+    const trdData = await trdRes.json();
+    signalHistoryData = sigData.history || [];
+    tradeHistoryData = trdData.history || [];
+    renderHistory();
+  } catch (err) {
+    console.error('History load error:', err);
+  }
+}
+
+function renderHistory() {
+  const content = document.getElementById('historyContent');
+
+  if (activeTab === 'signals') {
+    if (signalHistoryData.length === 0) {
+      content.innerHTML = '<div class="history-empty">No signals yet. Click ⚡ to generate your first signal.</div>';
+      return;
+    }
+    content.innerHTML = signalHistoryData.map(s => `
+      <div class="history-item">
+        <div class="history-badge ${s.direction}">${s.direction}</div>
+        <div class="history-info">
+          <div class="history-info-top">BTC $${Number(s.price).toLocaleString()} · ${s.confidence}% confidence</div>
+          <div class="history-info-bottom">${s.reasoning}</div>
+        </div>
+        <div class="history-meta">
+          <div>${s.time}</div>
+          <div>${s.date}</div>
+        </div>
+      </div>
+    `).join('');
+
+  } else {
+    if (tradeHistoryData.length === 0) {
+      content.innerHTML = '<div class="history-empty">No trades executed yet. Generate a signal and execute on SoDEX.</div>';
+      return;
+    }
+    content.innerHTML = tradeHistoryData.map(t => `
+      <div class="history-item">
+        <div class="history-badge ${t.side}">${t.side}</div>
+        <div class="history-info">
+          <div class="history-info-top">BTC · ${t.quantity} BTC @ $${Number(t.price).toLocaleString()}</div>
+          <div class="history-info-bottom">SoDEX Testnet · ${t.status}</div>
+        </div>
+        <div class="history-meta">
+          <div>${t.time}</div>
+          <div>${t.date}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+let etfChartInstance = null;
+let etfData = { btc: [], eth: [] };
+let activeChartTab = 'btc';
+
+async function showETFChart() {
+  const panel = document.getElementById('chartPanel');
+  panel.style.display = 'block';
+  document.getElementById('chartContent').innerHTML = `
+    <div class="chart-loading">
+      <div class="typing"><span></span><span></span><span></span></div>
+      <br>Loading ETF flow data...
+    </div>`;
+
+  try {
+    const res = await fetch('/api/etf-history');
+    etfData = await res.json();
+    renderChart(activeChartTab);
+  } catch (err) {
+    document.getElementById('chartContent').innerHTML =
+      '<div class="chart-loading">⚠️ Could not load ETF data.</div>';
+  }
+}
+
+function closeChart() {
+  document.getElementById('chartPanel').style.display = 'none';
+  if (etfChartInstance) {
+    etfChartInstance.destroy();
+    etfChartInstance = null;
+  }
+}
+
+function switchChartTab(tab) {
+  activeChartTab = tab;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`ctab-${tab}`).classList.add('active');
+  renderChart(tab);
+}
+
+function renderChart(tab) {
+  document.getElementById('chartContent').innerHTML = `
+    <div class="chart-container">
+      <canvas id="etfChart"></canvas>
+    </div>
+    <div class="chart-summary" id="chartSummary"></div>`;
+
+  const data = etfData[tab] || [];
+  if (!data.length) {
+    document.getElementById('chartContent').innerHTML =
+      '<div class="chart-loading">No ETF data available.</div>';
+    return;
+  }
+
+  const labels = data.map(d => d.date || '');
+  const values = data.map(d => d.inflow || 0);
+
+  const colors = values.map(v => v >= 0 ? 'rgba(29, 158, 117, 0.8)' : 'rgba(226, 75, 74, 0.8)');
+  const borders = values.map(v => v >= 0 ? '#1D9E75' : '#E24B4A');
+
+  const ctx = document.getElementById('etfChart').getContext('2d');
+  if (etfChartInstance) etfChartInstance.destroy();
+
+  etfChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: `${tab.toUpperCase()} ETF Daily Net Inflow ($M)`,
+        data: values,
+        backgroundColor: colors,
+        borderColor: borders,
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.raw;
+              return `${v >= 0 ? '+' : ''}$${v.toFixed(1)}M`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#a06040',
+            font: { size: 10 },
+            maxRotation: 45
+          },
+          grid: { color: '#1a0a00' }
+        },
+        y: {
+          ticks: {
+            color: '#a06040',
+            font: { size: 10 },
+            callback: v => `$${v}M`
+          },
+          grid: { color: '#3D1F0A' }
+        }
+      }
+    }
+  });
+
+  // Summary cards
+  const total = values.reduce((a, b) => a + b, 0);
+  const avg = total / values.length;
+  const positive = values.filter(v => v > 0).length;
+  const latest = values[values.length - 1];
+
+  document.getElementById('chartSummary').innerHTML = `
+    <div class="chart-summary-card">
+      <div class="chart-summary-label">14-DAY TOTAL</div>
+      <div class="chart-summary-value ${total >= 0 ? 'positive' : 'negative'}">${total >= 0 ? '+' : ''}$${total.toFixed(0)}M</div>
+    </div>
+    <div class="chart-summary-card">
+      <div class="chart-summary-label">DAILY AVG</div>
+      <div class="chart-summary-value ${avg >= 0 ? 'positive' : 'negative'}">${avg >= 0 ? '+' : ''}$${avg.toFixed(0)}M</div>
+    </div>
+    <div class="chart-summary-card">
+      <div class="chart-summary-label">INFLOW DAYS</div>
+      <div class="chart-summary-value positive">${positive}/14</div>
+    </div>
+    <div class="chart-summary-card">
+      <div class="chart-summary-label">LATEST</div>
+      <div class="chart-summary-value ${latest >= 0 ? 'positive' : 'negative'}">${latest >= 0 ? '+' : ''}$${latest.toFixed(0)}M</div>
+    </div>
+  `;
+}
+
+async function executeTrade(side, signal) {
+  const asset = document.getElementById('tradeAsset').value;
+  const amount = parseFloat(document.getElementById('tradeAmount').value);
+  const leverage = parseInt(document.getElementById('tradeLeverage').value);
+  const resultEl = document.getElementById('tradeResult');
+
+  if (amount < 5) {
+    resultEl.innerHTML = '<div class="trade-result-error">⚠️ Minimum trade amount is $5</div>';
+    return;
+  }
+
+  // Disable buttons while trading
+  document.querySelectorAll('.trade-side-btn').forEach(b => b.disabled = true);
+  resultEl.innerHTML = '<div class="trade-result-success">⏳ Executing trade on SoDEX...</div>';
+
+  try {
+    const isSpot = leverage === 0;
+    const endpoint = isSpot ? '/api/trade/spot' : '/api/trade/futures';
+
+    const body = isSpot
+      ? { asset, side, usdAmount: amount }
+      : { asset, side: side === 'BUY' ? 'LONG' : 'SHORT', usdAmount: amount, leverage };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      const typeLabel = isSpot ? 'SPOT' : `FUTURES ${leverage}x`;
+      resultEl.innerHTML = `
+        <div class="trade-result-success">
+          ✅ ${typeLabel} ${side} executed on SoDEX!<br/>
+          ${data.quantity} ${asset} @ $${Number(data.price).toLocaleString()}<br/>
+          Order ID: ${data.orderID}
+        </div>`;
+
+      // Save to trade history
+      await fetch('/api/trade/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          side: isSpot ? side : (side === 'BUY' ? 'LONG' : 'SHORT'),
+          asset,
+          quantity: data.quantity,
+          price: data.price,
+          usdAmount: amount,
+          leverage: isSpot ? 1 : leverage,
+          type: isSpot ? 'SPOT' : 'FUTURES',
+          orderID: data.orderID
+        })
+      });
+
+    } else {
+      resultEl.innerHTML = `<div class="trade-result-error">❌ Trade failed: ${data.error}</div>`;
+    }
+
+  } catch (err) {
+    resultEl.innerHTML = `<div class="trade-result-error">❌ Connection error. Try again.</div>`;
+  }
+
+  document.querySelectorAll('.trade-side-btn').forEach(b => b.disabled = false);
+}
 </script>
 </body>
 </html>
