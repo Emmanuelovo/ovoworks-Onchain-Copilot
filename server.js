@@ -1,11 +1,60 @@
+const dotenv = require('dotenv');
+dotenv.config();
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const express = require('express');
 const axios = require('axios');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const mongoose = require('mongoose');
 
-dotenv.config();
+// Connect to MongoDB
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ MongoDB connected'))
+    .catch(err => {
+      console.error('❌ MongoDB error:', err.message);
+      console.log('⚠️ Running without persistence — in-memory only');
+    });
+} else {
+  console.log('⚠️ No MongoDB URI — running without persistence');
+}
+// Schemas
+const SignalSchema = new mongoose.Schema({
+  direction: String,
+  confidence: Number,
+  price: Number,
+  etfFlow: Number,
+  reasoning: String,
+  time: String,
+  date: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const TradeSchema = new mongoose.Schema({
+  type: String,
+  asset: String,
+  side: String,
+  quantity: String,
+  price: Number,
+  usdAmount: Number,
+  leverage: Number,
+  orderID: Number,
+  status: String,
+  time: String,
+  date: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ChatSchema = new mongoose.Schema({
+  sessionId: String,
+  role: String,
+  content: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Signal = mongoose.model('Signal', SignalSchema);
+const Trade = mongoose.model('Trade', TradeSchema);
+const Chat = mongoose.model('Chat', ChatSchema);
 
 const { placeSpotOrder, getSpotBalance } = require('./traders/spot');
 const { placeFuturesOrder, getFuturesBalance } = require('./traders/futures');
@@ -99,8 +148,82 @@ async function fetchETF() {
 }
 
 async function fetchETFHistory() {
-  // Temporarily disabled pending API key reset
-  return { btcList: [], ethList: [] };
+  try {
+    const btcTickers = ['ibit', 'fbtc', 'bitb'];
+    const ethTickers = ['etha', 'feth'];
+
+    const btcRequests = btcTickers.map(ticker =>
+      axios.get(
+        `https://openapi.sosovalue.com/api/v1/etfs/${ticker}/history?pageNum=1&pageSize=14`,
+        {
+          headers: {
+            'x-soso-api-key': process.env.SOSOVALUE_API_KEY,
+            'Accept': 'application/json'
+          }
+        }
+      ).catch(e => ({ data: null }))
+    );
+
+    const ethRequests = ethTickers.map(ticker =>
+      axios.get(
+        `https://openapi.sosovalue.com/api/v1/etfs/${ticker}/history?pageNum=1&pageSize=14`,
+        {
+          headers: {
+            'x-soso-api-key': process.env.SOSOVALUE_API_KEY,
+            'Accept': 'application/json'
+          }
+        }
+      ).catch(e => ({ data: null }))
+    );
+
+    const [btcResults, ethResults] = await Promise.all([
+      Promise.all(btcRequests),
+      Promise.all(ethRequests)
+    ]);
+
+    // Aggregate daily net inflows across all BTC ETFs
+    const btcAggregated = {};
+    btcResults.forEach(res => {
+      const list = res.data?.data || [];
+      list.forEach(item => {
+        const date = item.date || item.trade_date || item.tradingDay;
+        const inflow = parseFloat(item.net_inflow || item.netInflow || item.net_flow || 0);
+        if (date) {
+          btcAggregated[date] = (btcAggregated[date] || 0) + inflow;
+        }
+      });
+    });
+
+    // Aggregate daily net inflows across all ETH ETFs
+    const ethAggregated = {};
+    ethResults.forEach(res => {
+      const list = res.data?.data || [];
+      list.forEach(item => {
+        const date = item.date || item.trade_date || item.tradingDay;
+        const inflow = parseFloat(item.net_inflow || item.netInflow || item.net_flow || 0);
+        if (date) {
+          ethAggregated[date] = (ethAggregated[date] || 0) + inflow;
+        }
+      });
+    });
+
+    const btcList = Object.entries(btcAggregated)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-14)
+      .map(([date, inflow]) => ({ date, netInflow: inflow }));
+
+    const ethList = Object.entries(ethAggregated)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-14)
+      .map(([date, inflow]) => ({ date, netInflow: inflow }));
+
+    console.log('✅ ETF history loaded — BTC days:', btcList.length, 'ETH days:', ethList.length);
+    return { btcList, ethList };
+
+  } catch (e) {
+    console.error('ETF history error:', e.message);
+    return { btcList: [], ethList: [] };
+  }
 }
 
 // ── 3. CoinGecko Live Prices ────────────────────────────────────
@@ -237,6 +360,13 @@ app.post('/api/chat', async (req, res) => {
     // Add to session history
     session.history.push(latestMessage);
 
+    // Save to MongoDB
+await Chat.create({
+  sessionId: sid,
+  role: latestMessage.role,
+  content: latestMessage.content
+}).catch(e => console.error('Chat save error:', e.message));
+
     // Keep last 20 messages (10 exchanges)
     if (session.history.length > 20) {
       session.history = session.history.slice(-20);
@@ -278,6 +408,12 @@ app.post('/api/chat', async (req, res) => {
       role: 'assistant',
       content: reply
     });
+
+    await Chat.create({
+  sessionId: sid,
+  role: 'assistant',
+  content: reply
+}).catch(e => console.error('Chat save error:', e.message));
 
     // Clean up old sessions every hour
     const now = Date.now();
@@ -339,15 +475,16 @@ You MUST respond with ONLY valid JSON in this exact format, no other text:
     const clean = text.replace(/```json|```/g, '').trim();
     const signal = JSON.parse(clean);
 
-    // Save to signal history
-    signalHistory.unshift({
-      ...signal,
-      time: new Date().toLocaleTimeString(),
-      date: new Date().toLocaleDateString()
-    });
+    const signalRecord = {
+  ...signal,
+  time: new Date().toLocaleTimeString(),
+  date: new Date().toLocaleDateString()
+};
+signalHistory.unshift(signalRecord);
+if (signalHistory.length > 50) signalHistory.pop();
 
-    // Keep last 50 signals
-    if (signalHistory.length > 50) signalHistory.pop();
+// Save to MongoDB
+await Signal.create(signalRecord).catch(e => console.error('Signal save error:', e.message));
 
     res.json({ signal });
 
@@ -358,13 +495,23 @@ You MUST respond with ONLY valid JSON in this exact format, no other text:
 });
 
 // Get signal history
-app.get('/api/signal/history', (req, res) => {
-  res.json({ history: signalHistory });
+app.get('/api/signal/history', async (req, res) => {
+  try {
+    const dbSignals = await Signal.find().sort({ createdAt: -1 }).limit(50);
+    res.json({ history: dbSignals.length > 0 ? dbSignals : signalHistory });
+  } catch (e) {
+    res.json({ history: signalHistory });
+  }
 });
 
 // Get trade history
-app.get('/api/trade/history', (req, res) => {
-  res.json({ history: tradeHistory });
+app.get('/api/trade/history', async (req, res) => {
+  try {
+    const dbTrades = await Trade.find().sort({ createdAt: -1 }).limit(50);
+    res.json({ history: dbTrades.length > 0 ? dbTrades : tradeHistory });
+  } catch (e) {
+    res.json({ history: tradeHistory });
+  }
 });
 
 // Save executed trade to history
@@ -383,10 +530,10 @@ app.get('/api/etf-history', async (req, res) => {
   try {
     const { btcList, ethList } = await fetchETFHistory();
 
-    const formatList = (list) => list.map(item => ({
-      date: item.date || item.time || item.day,
-      inflow: parseFloat(item.netInflow || item.dailyNetInflow || 0) / 1e6
-    }));
+  const formatList = (list) => list.map(d => ({
+  date: d.date || '',
+  inflow: parseFloat(d.net_inflow || d.netInflow || 0) / 1e6
+}));
 
     res.json({
       btc: formatList(btcList),
@@ -399,62 +546,66 @@ app.get('/api/etf-history', async (req, res) => {
 
 // ── Spot Trade Endpoint ─────────────────────────────────────
 app.post('/api/trade/spot', async (req, res) => {
-  const { asset, side, usdAmount } = req.body;
-
-  if (!process.env.WALLET_PRIVATE_KEY || !process.env.WALLET_ADDRESS) {
-    return res.status(400).json({ error: 'Wallet not configured' });
-  }
-
-  const result = await placeSpotOrder({
-    asset: asset || 'BTC',
-    side: side === 'BUY' ? 1 : 2,
-    usdAmount: parseFloat(usdAmount) || 10,
-    accountID: 56942,
-    privateKey: process.env.WALLET_PRIVATE_KEY
-  });
-
-  if (result.success) {
-    // Save to trade history
-    tradeHistory.unshift({
-      ...result,
-      time: new Date().toLocaleTimeString(),
-      date: new Date().toLocaleDateString(),
-      status: 'Filled'
+  try {
+    const { asset, side, usdAmount } = req.body;
+    if (!process.env.WALLET_PRIVATE_KEY || !process.env.WALLET_ADDRESS) {
+      return res.status(400).json({ error: 'Wallet not configured' });
+    }
+    const result = await placeSpotOrder({
+      asset: asset || 'BTC',
+      side: side === 'BUY' ? 1 : 2,
+      usdAmount: parseFloat(usdAmount) || 10,
+      accountID: 56942,
+      privateKey: process.env.WALLET_PRIVATE_KEY
     });
-    if (tradeHistory.length > 50) tradeHistory.pop();
+    if (result.success) {
+      const tradeRecord = {
+        ...result,
+        time: new Date().toLocaleTimeString(),
+        date: new Date().toLocaleDateString(),
+        status: 'Filled'
+      };
+      tradeHistory.unshift(tradeRecord);
+      if (tradeHistory.length > 50) tradeHistory.pop();
+      await Trade.create(tradeRecord).catch(e => console.error('Trade save error:', e.message));
+    }
+    res.json(result);
+  } catch (error) {
+    console.error('Spot trade error:', error.message);
+    res.status(500).json({ error: 'Trade failed. Please try again.' });
   }
-
-  res.json(result);
 });
-
 // ── Futures Trade Endpoint ──────────────────────────────────
 app.post('/api/trade/futures', async (req, res) => {
-  const { asset, side, usdAmount, leverage } = req.body;
-
-  if (!process.env.WALLET_PRIVATE_KEY || !process.env.WALLET_ADDRESS) {
-    return res.status(400).json({ error: 'Wallet not configured' });
-  }
-
-  const result = await placeFuturesOrder({
-    asset: asset || 'BTC',
-    side: side === 'LONG' ? 1 : 2,
-    usdAmount: parseFloat(usdAmount) || 10,
-    leverage: parseInt(leverage) || 5,
-    accountID: 56942,
-    privateKey: process.env.WALLET_PRIVATE_KEY
-  });
-
-  if (result.success) {
-    tradeHistory.unshift({
-      ...result,
-      time: new Date().toLocaleTimeString(),
-      date: new Date().toLocaleDateString(),
-      status: 'Filled'
+  try {
+    const { asset, side, usdAmount, leverage } = req.body;
+    if (!process.env.WALLET_PRIVATE_KEY || !process.env.WALLET_ADDRESS) {
+      return res.status(400).json({ error: 'Wallet not configured' });
+    }
+    const result = await placeFuturesOrder({
+      asset: asset || 'BTC',
+      side: side === 'LONG' ? 1 : 2,
+      usdAmount: parseFloat(usdAmount) || 10,
+      leverage: parseInt(leverage) || 5,
+      accountID: 56942,
+      privateKey: process.env.WALLET_PRIVATE_KEY
     });
-    if (tradeHistory.length > 50) tradeHistory.pop();
+    if (result.success) {
+      const tradeRecord = {
+        ...result,
+        time: new Date().toLocaleTimeString(),
+        date: new Date().toLocaleDateString(),
+        status: 'Filled'
+      };
+      tradeHistory.unshift(tradeRecord);
+      if (tradeHistory.length > 50) tradeHistory.pop();
+      await Trade.create(tradeRecord).catch(e => console.error('Trade save error:', e.message));
+    }
+    res.json(result);
+  } catch (error) {
+    console.error('Futures trade error:', error.message);
+    res.status(500).json({ error: 'Trade failed. Please try again.' });
   }
-
-  res.json(result);
 });
 
 // ── Wallet Balance Endpoint ─────────────────────────────────

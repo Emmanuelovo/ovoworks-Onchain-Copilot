@@ -702,6 +702,27 @@
   color: #E24B4A;
 }
 
+.action-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btns .signal-btn,
+.action-btns .chart-btn,
+.action-btns .history-btn {
+  width: auto;
+  height: auto;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
@@ -733,8 +754,30 @@
           <span class="chip" onclick="ask('Should I be looking at DeFi tokens right now?')">DeFi outlook</span>
           <span class="chip" onclick="ask('How does SoDEX work?')">What is SoDEX?</span>
         </div>
+        <!-- Action buttons -->
+        <!-- Action buttons -->
+        <div class="action-btns">
+          <button class="signal-btn" onclick="generateSignal()" title="Generate trade signal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            ⚡ Live Signal
+          </button>
+          <button class="chart-btn" onclick="showETFChart()" title="ETF Flow Chart">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M3 3v18h18M7 16l4-4 4 4 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            📊 ETF Chart
+          </button>
+          <button class="history-btn" onclick="toggleHistory()" title="Trade history">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            🕐 History
+          </button>
       </div>
     </div>
+  </div>
   </div>
 <!-- Signal Engine Panel -->
 <div class="signal-panel" id="signalPanel" style="display:none">
@@ -780,21 +823,7 @@
       placeholder="Ask OvoWorks anything about crypto markets..."
       onkeydown="if(event.key==='Enter') sendMsg()"
     />
-    <button class="signal-btn" onclick="generateSignal()" title="Generate trade signal">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
-<button class="chart-btn" onclick="showETFChart()" title="ETF Flow Chart">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M3 3v18h18M7 16l4-4 4 4 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
-<button class="history-btn" onclick="toggleHistory()" title="Trade history">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
+  
     <button class="send-btn" id="sendBtn" onclick="sendMsg()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
