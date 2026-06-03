@@ -4,10 +4,10 @@
 
 ![OvoWorks](https://img.shields.io/badge/Powered%20by-SoSoValue-F4845F?style=for-the-badge)
 ![Claude](https://img.shields.io/badge/AI-Claude%20Sonnet%204.6-black?style=for-the-badge)
-![Railway](https://img.shields.io/badge/Deployed-Railway-purple?style=for-the-badge)
+![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=for-the-badge)
 
 ## 🌐 Live Demo
-**[ovoworks-onchain-copilot-production.up.railway.app](https://ovoworks-onchain-copilot-production.up.railway.app)**
+**[ovoworks-onchain-copilot.onrender.com](https://ovoworks-onchain-copilot.onrender.com)**
 
 ---
 
