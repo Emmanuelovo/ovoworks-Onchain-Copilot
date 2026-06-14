@@ -95,7 +95,7 @@ Open `http://localhost:3000` in your browser.
 | Wave | Focus | Status |
 |------|-------|--------|
 | Wave 1 | Concept, UI, AI brain, live data, deployment | ✅ Complete |
-| Wave 2 | SoDEX integration, portfolio tracker, ETF charts | 🔜 May 18 |
+| Wave 2 | SoDEX integration, portfolio tracker, ETF charts |✅ Complete|
 | Wave 3 | Full polish, alerts, mobile UI, final demo | 🔜 Jun 4 |
 
 ---
