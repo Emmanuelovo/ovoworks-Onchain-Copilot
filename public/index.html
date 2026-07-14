@@ -1,1288 +1,1680 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>OvoWorks — OnChain Finance Copilot</title>
- <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #1a0a00;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
+    :root {
+      --bg: #0a0800;
+      --surface: #1a0a00;
+      --border: #3D1F0A;
+      --accent: #F4845F;
+      --accent2: #c45a35;
+      --text: #FFF5EE;
+      --dim: #a06040;
+      --green: #1D9E75;
+      --red: #E24B4A;
+    }
 
-  .app {
-    width: 100%;
-    max-width: 780px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #1a0a00;
-    border-left: 1px solid #3D1F0A;
-    border-right: 1px solid #3D1F0A;
-  }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
 
-  .header {
-    padding: 16px 24px;
-    border-bottom: 1px solid #3D1F0A;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: #1a0a00;
-  }
-
-  .logo {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #F4845F, #c45a35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .header-text h1 {
-    font-size: 17px;
-    font-weight: 600;
-    color: #FFF5EE;
-    letter-spacing: 0.3px;
-  }
-
-  .header-text p {
-    font-size: 12px;
-    color: #a06040;
-    margin-top: 2px;
-  }
-
-  .status {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #a06040;
-  }
-
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #F4845F;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    background: #120600;
-  }
-
-  .messages::-webkit-scrollbar { width: 4px; }
-  .messages::-webkit-scrollbar-track { background: transparent; }
-  .messages::-webkit-scrollbar-thumb { background: #3D1F0A; border-radius: 4px; }
-
-  .msg {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    max-width: 88%;
-  }
-
-  .msg.user {
-    flex-direction: row-reverse;
-    align-self: flex-end;
-  }
-
-  .avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .avatar.ai {
-    background: linear-gradient(135deg, #F4845F, #c45a35);
-    color: white;
-  }
-
-  .avatar.user {
-    background: #3D1F0A;
-    color: #F4845F;
-  }
-
-  .bubble {
-    padding: 12px 16px;
-    border-radius: 14px;
-    font-size: 14px;
-    line-height: 1.7;
-  }
-
-  .msg.ai .bubble {
-    background: #1a0a00;
-    border: 1px solid #3D1F0A;
-    color: #FFF5EE;
-    border-radius: 4px 14px 14px 14px;
-  }
-
-  .msg.user .bubble {
-    background: linear-gradient(135deg, #F4845F, #c45a35);
-    color: white;
-    border-radius: 14px 4px 14px 14px;
-  }
-
-  .source-tag {
-    display: inline-block;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    background: #3D1F0A;
-    color: #F4845F;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-  }
-
-  .chips {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
-
-  .chip {
-    font-size: 12px;
-    padding: 6px 12px;
-    border: 1px solid #3D1F0A;
-    border-radius: 20px;
-    background: #1a0a00;
-    color: #F4845F;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .chip:hover {
-    background: #3D1F0A;
-    color: #FFF5EE;
-    border-color: #F4845F;
-  }
-
-  .typing {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    padding: 4px 0;
-  }
-
-  .typing span {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #F4845F;
-    animation: bounce 1.2s infinite;
-  }
-
-  .typing span:nth-child(2) { animation-delay: 0.2s; }
-  .typing span:nth-child(3) { animation-delay: 0.4s; }
-
-  @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-6px); }
-  }
-
-  .inputbar {
-    padding: 16px 20px;
-    border-top: 1px solid #3D1F0A;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    background: #1a0a00;
-  }
-
-  .inputbar input {
-    flex: 1;
-    background: #120600;
-    border: 1px solid #3D1F0A;
-    border-radius: 24px;
-    padding: 11px 18px;
-    font-size: 14px;
-    color: #FFF5EE;
-    outline: none;
-    font-family: 'Segoe UI', sans-serif;
-    transition: border-color 0.2s;
-  }
-
-  .inputbar input:focus {
-    border-color: #F4845F;
-  }
-
-  .inputbar input::placeholder {
-    color: #5a2e10;
-  }
-
-  .send-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #F4845F, #c45a35);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: opacity 0.15s;
-  }
-
-  .send-btn:hover { opacity: 0.85; }
-  .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .signal-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #F4845F, #c45a35);
-  border: none;
-  cursor: pointer;
-  display: flex;
+    /* ── NAV ── */
+    nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: opacity 0.15s;
-}
-.signal-btn:hover { opacity: 0.85; }
-
-.signal-panel {
-  background: #1a0a00;
-  border-top: 1px solid #F4845F;
-  padding: 16px 20px;
-  animation: slideUp 0.3s ease;
+  padding: 14px 40px;
+  background: rgba(10,8,0,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.signal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.signal-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #F4845F;
-  letter-spacing: 0.5px;
-}
-
-.signal-close {
-  cursor: pointer;
-  color: #a06040;
-  font-size: 14px;
-}
-
-.signal-close:hover { color: #FFF5EE; }
-
-.signal-cards {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.signal-card {
-  flex: 1;
-  min-width: 80px;
-  background: #120600;
-  border: 1px solid #3D1F0A;
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.signal-card-label {
-  font-size: 10px;
-  color: #a06040;
-  margin-bottom: 4px;
-  letter-spacing: 0.5px;
-}
-
-.signal-card-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: #FFF5EE;
-}
-
-.signal-card-value.buy { color: #1D9E75; }
-.signal-card-value.sell { color: #E24B4A; }
-.signal-card-value.hold { color: #F4845F; }
-
-.signal-action {
-  font-size: 13px;
-  color: #c8a882;
-  line-height: 1.6;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  background: #120600;
-  border-radius: 8px;
-  border-left: 3px solid #F4845F;
-}
-
-.sodex-btn {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(135deg, #F4845F, #c45a35);
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  letter-spacing: 0.3px;
-}
-
-.sodex-btn:hover { opacity: 0.85; }
-
-.signal-loading {
-  text-align: center;
-  padding: 16px;
-  color: #a06040;
-  font-size: 13px;
-}
-
-.history-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #3D1F0A;
-  border: 1px solid #F4845F;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: opacity 0.15s;
-}
-.history-btn:hover { opacity: 0.85; }
-
-.history-panel {
-  background: #1a0a00;
-  border-top: 1px solid #3D1F0A;
-  padding: 16px 20px;
-  max-height: 280px;
-  overflow-y: auto;
-  animation: slideUp 0.3s ease;
-}
-
-.history-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #3D1F0A;
-  padding-bottom: 8px;
-}
-
-.history-tab {
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-  background: #120600;
-  color: #a06040;
-}
-
-.history-tab.active {
-  background: #F4845F;
-  color: white;
-}
-
-.history-close {
-  margin-left: auto;
-  cursor: pointer;
-  color: #a06040;
-  font-size: 14px;
-  background: none;
-  border: none;
-}
-
-.history-close:hover { color: #FFF5EE; }
-
-.history-empty {
-  text-align: center;
-  padding: 20px;
-  color: #a06040;
-  font-size: 13px;
-}
-
-.history-item {
+   .nav-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: #120600;
-  margin-bottom: 6px;
-  border: 1px solid #3D1F0A;
-}
-
-.history-badge {
-  font-size: 11px;
+  font-size: 18px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  flex-shrink: 0;
+  color: var(--text);
+  text-decoration: none;
 }
 
-.history-badge.BUY { background: #0f2d22; color: #1D9E75; }
-.history-badge.SELL { background: #2d0f0f; color: #E24B4A; }
-.history-badge.HOLD { background: #2d1a0a; color: #F4845F; }
+    .nav-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: white;
+    }
 
-.history-info {
-  flex: 1;
-  min-width: 0;
-}
+    .nav-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(244,132,95,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(244,132,95,0.3);
+    }
 
-.history-info-top {
-  font-size: 12px;
-  color: #FFF5EE;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.history-info-bottom {
-  font-size: 11px;
-  color: #a06040;
-  margin-top: 2px;
-}
-
-.history-meta {
-  font-size: 11px;
-  color: #a06040;
-  text-align: right;
-  flex-shrink: 0;
-}
-.chart-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #3D1F0A;
-  border: 1px solid #F4845F;
-  cursor: pointer;
+    .nav-links {
   display: flex;
-  align-items: center;
+  gap: 4px;
+  list-style: none;
   justify-content: center;
-  flex-shrink: 0;
-  transition: opacity 0.15s;
-}
-.chart-btn:hover { opacity: 0.85; }
-
-.chart-panel {
-  background: #1a0a00;
-  border-top: 1px solid #3D1F0A;
-  padding: 16px 20px;
-  animation: slideUp 0.3s ease;
 }
 
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.chart-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #F4845F;
-}
-
-.chart-close {
-  cursor: pointer;
-  color: #a06040;
-  font-size: 14px;
-  background: none;
-  border: none;
-  color: #a06040;
-}
-
-.chart-close:hover { color: #FFF5EE; }
-
-.chart-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.chart-tab {
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s;
-  background: #120600;
-  color: #a06040;
-}
-
-.chart-tab.active {
-  background: #F4845F;
-  color: white;
-}
-
-.chart-container {
-  position: relative;
-  height: 200px;
-  width: 100%;
-}
-
-.chart-loading {
-  text-align: center;
-  padding: 20px;
-  color: #a06040;
-  font-size: 13px;
-}
-
-.chart-summary {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.chart-summary-card {
-  flex: 1;
-  background: #120600;
-  border: 1px solid #3D1F0A;
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-
-.chart-summary-label {
-  font-size: 10px;
-  color: #a06040;
-  margin-bottom: 3px;
-}
-
-.chart-summary-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #FFF5EE;
-}
-
-.chart-summary-value.positive { color: #1D9E75; }
-.chart-summary-value.negative { color: #E24B4A; }
-
-  .footer {
-    text-align: center;
-    padding: 8px;
-    font-size: 11px;
-    color: #3D1F0A;
-    background: #1a0a00;
-  }
-
-  .source-tag + .source-tag {
-  margin-left: 4px;
-}
-
-.trade-panel {
-  margin-top: 12px;
-  padding: 12px;
-  background: #120600;
-  border-radius: 10px;
-  border: 1px solid #3D1F0A;
-}
-
-.trade-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: center;
-}
-
-.trade-select {
-  flex: 1;
-  background: #1a0a00;
-  border: 1px solid #3D1F0A;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 13px;
-  color: #FFF5EE;
-  outline: none;
-}
-
-.trade-input {
-  flex: 1;
-  background: #1a0a00;
-  border: 1px solid #3D1F0A;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 13px;
-  color: #FFF5EE;
-  outline: none;
-}
-
-.trade-input:focus, .trade-select:focus {
-  border-color: #F4845F;
-}
-
-.trade-side-btns {
-  display: flex;
-  gap: 6px;
-  flex: 1;
-}
-
-.trade-side-btn {
-  flex: 1;
-  padding: 8px;
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.trade-side-btn.buy {
-  background: #1D9E75;
-  color: white;
-}
-
-.trade-side-btn.sell {
-  background: #E24B4A;
-  color: white;
-}
-
-.trade-side-btn:hover { opacity: 0.85; }
-.trade-side-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.trade-result-success {
-  margin-top: 8px;
-  padding: 10px;
-  background: #0f2d22;
-  border: 1px solid #1D9E75;
-  border-radius: 8px;
-  font-size: 12px;
-  color: #1D9E75;
-}
-
-.trade-result-error {
-  margin-top: 8px;
-  padding: 10px;
-  background: #2d0f0f;
-  border: 1px solid #E24B4A;
-  border-radius: 8px;
-  font-size: 12px;
-  color: #E24B4A;
-}
-
-.action-btns {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-.action-btns .signal-btn,
-.action-btns .chart-btn,
-.action-btns .history-btn {
-  width: auto;
-  height: auto;
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-size: 12px;
-  font-weight: 500;
+.nav-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    .nav-links a {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--dim);
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .nav-wallet-btn {
+      padding: 8px 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .nav-wallet-btn:hover { opacity: 0.85; }
+
+    .launch-btn {
+      padding: 8px 18px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .launch-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(244,132,95,0.08) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(244,132,95,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(244,132,95,0.3);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      max-width: 900px;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--dim);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+
+    .cta-primary {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cta-primary:hover { opacity: 0.85; }
+
+    .cta-secondary {
+      padding: 14px 32px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .cta-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── CAROUSEL ── */
+    .carousel {
+      width: 100%;
+      max-width: 700px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .carousel-header {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .carousel-slides {
+      position: relative;
+      height: 180px;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .slide.active { opacity: 1; }
+
+    .slide-step {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .slide-desc {
+      font-size: 14px;
+      color: var(--dim);
+      line-height: 1.6;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .cdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .cdot.active { background: var(--accent); }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 100px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-badge {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--dim);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .step-card:hover { border-color: var(--accent); }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: white;
+      margin-bottom: 14px;
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 1.6;
+    }
+
+    .video-embed {
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-placeholder {
+      text-align: center;
+      color: var(--dim);
+    }
+
+    .video-placeholder svg {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 12px;
+    }
+
+    /* ── DATA SOURCES ── */
+    .sources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .source-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .source-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+
+    .source-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .source-desc {
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .source-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .source-tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(244,132,95,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(244,132,95,0.2);
+    }
+
+    .ssi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .ssi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .ssi-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .ssi-desc {
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    /* ── JUDGES ── */
+    .judges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .judge-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .judge-category {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .judge-weight {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .judge-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .judge-desc {
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 1.6;
+    }
+
+    .judge-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--dim);
+    }
+
+    .judge-check::before {
+      content: '✅';
+      flex-shrink: 0;
+    }
+
+    /* ── FEE CALCULATOR ── */
+    .calc-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .calc-header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .calc-body {
+      padding: 28px;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) { .calc-grid { grid-template-columns: 1fr; } }
+
+    .calc-label {
+      font-size: 12px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .calc-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .calc-input:focus { border-color: var(--accent); }
+
+    .calc-select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .calc-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .calc-result-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .calc-result-val {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .calc-result-label {
+      font-size: 11px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .orange { color: var(--accent); }
+
+    .fee-breakdown {
+      margin-top: 16px;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .fee-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fee-row:last-child { border: none; font-weight: 700; }
+    .fee-row-label { color: var(--dim); }
+
+    /* ── WALLET ── */
+    .wallet-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .wallet-address {
+      font-size: 13px;
+      color: var(--dim);
+      font-family: monospace;
+      margin: 12px 0;
+      word-break: break-all;
+    }
+
+    .wallet-balance {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text);
+      margin: 16px 0;
+    }
+
+    .wallet-coins {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .wallet-coin {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+
+    .wallet-coin-name { color: var(--dim); font-size: 11px; }
+    .wallet-coin-val { font-weight: 700; margin-top: 2px; }
+
+    .faucet-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(29,158,117,0.1);
+      border: 1px solid var(--green);
+      border-radius: 20px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 16px;
+      transition: all 0.2s;
+    }
+
+    .faucet-btn:hover {
+      background: rgba(29,158,117,0.2);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px;
+      text-align: center;
+      color: var(--dim);
+      font-size: 13px;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── WALLET MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      font-size: 14px;
+      color: var(--dim);
+      margin-bottom: 24px;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      margin-bottom: 10px;
+      transition: opacity 0.2s;
+    }
+
+    .modal-btn:hover { opacity: 0.85; }
+    .modal-btn.metamask { background: #F6851B; color: white; }
+    .modal-btn.cancel { background: var(--bg); color: var(--dim); border: 1px solid var(--border); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      section { padding: 60px 20px; }
+      .hero { padding: 100px 20px 60px; }
+    }
+  </style>
 </head>
 <body>
-<div class="app">
 
-  <div class="header">
-    <div class="logo">OW</div>
-    <div class="header-text">
-      <h1>OvoWorks</h1>
-      <p>OnChain Finance Copilot · Powered by SoSoValue + AI</p>
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nav-logo-icon">OW</div>
+    OvoWorks
+    <span class="nav-badge">SODEX TESTNET</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How it Works</a></li>
+    <li><a href="#data-sources">Data Sources</a></li>
+    <li><a href="#for-judges">For Judges</a></li>
+<li><a href="#integrations">Live Status</a></li>
+<li><a href="#trader-behavior">Trader Profile</a></li>
+    <li><a href="#calculator">Fee Calc</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-status">
+      <div class="status-dot"></div>
+      SoDEX testnet · live
     </div>
-    <div class="status">
-      <div class="dot"></div>
-      Live
+    <a class="launch-btn" href="/app.html">Launch App →</a>
+    <button class="nav-wallet-btn" onclick="openWalletModal()" id="walletBtn">Connect Wallet</button>
+  </div>
+
+  
+</nav>
+
+<!-- WALLET MODAL -->
+<div class="modal-overlay" id="walletModal">
+  <div class="modal">
+    <h3>Connect Wallet</h3>
+    <p>Connect your MetaMask wallet to access OvoWorks on SoDEX testnet</p>
+    <button class="modal-btn metamask" onclick="connectMetaMask()">
+      🦊 Connect MetaMask
+    </button>
+    <button class="modal-btn cancel" onclick="closeWalletModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-badge">
+    ⚡ SoSoValue · SoDEX · Claude AI · CoinGecko
+  </div>
+  <h1>Your Personal <span>OnChain Finance</span> Copilot</h1>
+  <p>Ask in plain English. Get live ETF flows, institutional signals, and execute real trades on SoDEX — all in one intelligent agent.</p>
+  <div class="hero-ctas">
+    <a class="cta-primary" href="/app.html">
+      🚀 Launch App
+    </a>
+    <a class="cta-secondary" href="#how-it-works">See How It Works</a>
+  </div>
+
+  <!-- CAROUSEL -->
+  <div class="carousel">
+    <div class="carousel-header">
+      <div class="carousel-dot" style="background:#ff5f57"></div>
+      <div class="carousel-dot" style="background:#febc2e"></div>
+      <div class="carousel-dot" style="background:#28c840"></div>
+      <span style="margin-left:8px;font-size:12px;color:var(--dim)">ovoworks / agent · execution loop</span>
+    </div>
+    <div class="carousel-slides">
+      <div class="slide active">
+        <div class="slide-step">STEP 01 · OBSERVE</div>
+        <div class="slide-title">📡 Live Market Intelligence</div>
+        <div class="slide-desc">OvoWorks pulls real-time ETF flows from SoSoValue Terminal, live prices from CoinGecko, and crypto news — every single query.</div>
+      </div>
+      <div class="slide">
+        <div class="slide-step">STEP 02 · REASON</div>
+        <div class="slide-title">🧠 AI Signal Generation</div>
+        <div class="slide-desc">Claude Sonnet 4.6 synthesises institutional flow data with market context to generate BUY/SELL/HOLD signals with confidence scoring.</div>
+      </div>
+      <div class="slide">
+        <div class="slide-step">STEP 03 · PROPOSE</div>
+        <div class="slide-title">📋 Trade Plan with Citations</div>
+        <div class="slide-desc">Every signal includes entry price, reasoning, and which data points (ETF flow, news, price action) triggered the recommendation.</div>
+      </div>
+      <div class="slide">
+        <div class="slide-step">STEP 04 · EXECUTE</div>
+        <div class="slide-title">⚡ On-Chain via SoDEX</div>
+        <div class="slide-desc">Execute spot trades or leveraged futures directly through SoDEX orderbook — EIP-712 signed, on ValueChain, verifiable on-chain.</div>
+      </div>
+    </div>
+    <div class="carousel-dots">
+      <div class="cdot active" onclick="goSlide(0)"></div>
+      <div class="cdot" onclick="goSlide(1)"></div>
+      <div class="cdot" onclick="goSlide(2)"></div>
+      <div class="cdot" onclick="goSlide(3)"></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <span class="section-badge">HOW IT WORKS</span>
+  <h2 class="section-title">From question to on-chain execution in seconds</h2>
+  <p class="section-sub">OvoWorks is the only buildathon submission that covers the full loop — research, signal, and real trade execution on SoDEX.</p>
+
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Ask in Plain English</div>
+      <div class="step-desc">Type any market question — "What are institutions doing with BTC?" or "Should I look at ETH right now?"</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Live Data Fetched</div>
+      <div class="step-desc">OvoWorks simultaneously pulls ETF flows from SoSoValue, prices from CoinGecko, and asset-specific news.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">AI Synthesises</div>
+      <div class="step-desc">Claude Sonnet 4.6 processes all live data and generates a clear, data-backed answer with specific numbers.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-title">Generate Signal</div>
+      <div class="step-desc">Click ⚡ to get a live trade signal — BUY/SELL/HOLD with confidence %, ETF flow data, and reasoning.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">5</div>
+      <div class="step-title">Execute on SoDEX</div>
+      <div class="step-desc">Choose spot or leveraged futures, set amount, and execute directly on SoDEX testnet orderbook.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">6</div>
+      <div class="step-title">Track Everything</div>
+      <div class="step-desc">Every signal and trade is saved to MongoDB. Signal history, trade history, and portfolio all persisted.</div>
     </div>
   </div>
 
-  <div class="messages" id="messages">
-    <div class="msg ai">
-      <div class="avatar ai">OW</div>
-      <div class="bubble">
-        <span class="source-tag">OVOWORKS · ONCHAIN COPILOT</span><br/>
-        Hello! I'm OvoWorks — your personal OnChain Finance Copilot. Ask me anything about crypto markets, Bitcoin ETF flows, DeFi opportunities, or on-chain data. I'm here to make complex finance simple.
-        <div class="chips">
-          <span class="chip" onclick="ask('What is Bitcoin ETF sentiment this week?')">BTC ETF sentiment</span>
-          <span class="chip" onclick="ask('Give me a crypto market brief for today')">Market brief</span>
-          <span class="chip" onclick="ask('What are the top performing crypto sectors right now?')">Top sectors</span>
-          <span class="chip" onclick="ask('Should I be looking at DeFi tokens right now?')">DeFi outlook</span>
-          <span class="chip" onclick="ask('How does SoDEX work?')">What is SoDEX?</span>
-        </div>
-        <!-- Action buttons -->
-        <!-- Action buttons -->
-        <div class="action-btns">
-          <button class="signal-btn" onclick="generateSignal()" title="Generate trade signal">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            ⚡ Live Signal
-          </button>
-          <button class="chart-btn" onclick="showETFChart()" title="ETF Flow Chart">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M3 3v18h18M7 16l4-4 4 4 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            📊 ETF Chart
-          </button>
-          <button class="history-btn" onclick="toggleHistory()" title="Trade history">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            🕐 History
-          </button>
+  <div class="video-embed" id="videoEmbed">
+    <div class="video-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#F4845F" stroke-width="1.5"/>
+        <path d="M10 8l6 4-6 4V8z" fill="#F4845F"/>
+      </svg>
+      <div style="color:var(--accent);font-weight:600">Demo Video</div>
+      <div style="font-size:13px;margin-top:4px">Coming soon — Wave 3</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA SOURCES -->
+<section id="data-sources">
+  <span class="section-badge">DATA SOURCES</span>
+  <h2 class="section-title">The intelligence layer powering OvoWorks</h2>
+  <p class="section-sub">Three live data streams combined with AI reasoning — giving you institutional-grade intelligence at zero cost.</p>
+
+  <div class="sources-grid">
+    <div class="source-card">
+      <div class="source-icon" style="background:rgba(244,132,95,0.1)">📊</div>
+      <div class="source-name">SoSoValue Terminal</div>
+      <div class="source-desc">Real-time Bitcoin and Ethereum ETF flow data — daily net inflows, cumulative flows, top ETF holders (BlackRock IBIT, Fidelity FBTC, Grayscale GBTC). 14-day historical flow charts. Asset-specific news feed filterable by currency.</div>
+      <div class="source-tags">
+        <span class="source-tag">ETF Flows</span>
+        <span class="source-tag">News Feed</span>
+        <span class="source-tag">Currency News</span>
+        <span class="source-tag">ETF History</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-icon" style="background:rgba(29,158,117,0.1)">🦎</div>
+      <div class="source-name">CoinGecko API</div>
+      <div class="source-desc">Live cryptocurrency prices, 24h changes, market capitalisation, and global market metrics including BTC dominance, total market cap, and 24h market movement. Free tier, no key required.</div>
+      <div class="source-tags">
+        <span class="source-tag">Live Prices</span>
+        <span class="source-tag">Market Cap</span>
+        <span class="source-tag">BTC Dominance</span>
+        <span class="source-tag">Global Metrics</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-icon" style="background:rgba(59,130,246,0.1)">⚡</div>
+      <div class="source-name">SoDEX / ValueChain</div>
+      <div class="source-desc">High-performance on-chain orderbook on ValueChain — OvoWorks' execution layer. Spot trading across 8 assets, perpetuals with up to 25x leverage, EIP-712 signed orders verified on-chain.</div>
+      <div class="source-tags">
+        <span class="source-tag">Spot Trading</span>
+        <span class="source-tag">Perps 25x</span>
+        <span class="source-tag">EIP-712</span>
+        <span class="source-tag">ValueChain</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-icon" style="background:rgba(139,92,246,0.1)">🤖</div>
+      <div class="source-name">Claude Sonnet 4.6</div>
+      <div class="source-desc">Anthropic's latest Sonnet model powers OvoWorks' reasoning layer. All live data is injected into Claude's context window, enabling it to synthesise institutional signals into plain English actionable intelligence.</div>
+      <div class="source-tags">
+        <span class="source-tag">AI Reasoning</span>
+        <span class="source-tag">Signal Engine</span>
+        <span class="source-tag">Session Memory</span>
+        <span class="source-tag">Plain English</span>
       </div>
     </div>
   </div>
-  </div>
-<!-- Signal Engine Panel -->
-<div class="signal-panel" id="signalPanel" style="display:none">
-  <div class="signal-header">
-    <span class="signal-title">⚡ Live Trade Signal</span>
-    <span class="signal-close" onclick="closeSignal()">✕</span>
-  </div>
-  <div class="signal-body" id="signalBody"></div>
-</div>
 
-<!-- ETF Chart Panel -->
-<div class="chart-panel" id="chartPanel" style="display:none">
-  <div class="chart-header">
-    <span class="chart-title">📊 ETF Flow History — 14 Days</span>
-    <button class="chart-close" onclick="closeChart()">✕</button>
-  </div>
-  <div class="chart-tabs">
-    <button class="chart-tab active" id="ctab-btc" onclick="switchChartTab('btc')">₿ Bitcoin ETF</button>
-    <button class="chart-tab" id="ctab-eth" onclick="switchChartTab('eth')">Ξ Ethereum ETF</button>
-  </div>
-  <div id="chartContent">
-    <div class="chart-container">
-      <canvas id="etfChart"></canvas>
+  <h3 style="margin-top:48px;margin-bottom:8px;font-size:18px">SSI Protocol Indices</h3>
+  <p style="color:var(--dim);font-size:14px;margin-bottom:20px">SoSoValue's on-chain index protocol — thematic crypto baskets OvoWorks tracks as market intelligence signals</p>
+
+  <div class="ssi-grid">
+    <div class="ssi-card">
+      <div class="ssi-name">MAG7.ssi</div>
+      <div class="ssi-desc">Top 7 large-cap crypto index</div>
     </div>
-    <div class="chart-summary" id="chartSummary"></div>
+    <div class="ssi-card">
+      <div class="ssi-name">DEFI.ssi</div>
+      <div class="ssi-desc">DeFi protocol basket</div>
+    </div>
+    <div class="ssi-card">
+      <div class="ssi-name">MEME.ssi</div>
+      <div class="ssi-desc">Top meme token index</div>
+    </div>
+    <div class="ssi-card">
+      <div class="ssi-name">AI.ssi</div>
+      <div class="ssi-desc">AI infrastructure tokens</div>
+    </div>
+    <div class="ssi-card">
+      <div class="ssi-name">USSI</div>
+      <div class="ssi-desc">US macro-correlated index</div>
+    </div>
+    <div class="ssi-card">
+      <div class="ssi-name">RWA.ssi</div>
+      <div class="ssi-desc">Real-world asset tokens</div>
+    </div>
   </div>
-</div>
+</section>
 
-<!-- History Panel -->
-<div class="history-panel" id="historyPanel" style="display:none">
-  <div class="history-tabs">
-    <button class="history-tab active" id="tab-signals" onclick="switchTab('signals')">📊 Signal History</button>
-    <button class="history-tab" id="tab-trades" onclick="switchTab('trades')">⚡ Trade History</button>
-    <button class="history-close" onclick="closeHistory()">✕</button>
+<div class="divider"></div>
+
+<!-- FOR JUDGES -->
+<section id="for-judges">
+  <span class="section-badge">FOR JUDGES</span>
+  <h2 class="section-title">Judge's Quick Start Guide</h2>
+  <p class="section-sub">Follow these steps to experience OvoWorks end-to-end in under 5 minutes.</p>
+
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Connect Your Wallet</div>
+      <div class="step-desc">Click "Connect Wallet" in the top right. Use MetaMask on SoDEX testnet. Your wallet address unlocks your personal trade history and portfolio view.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Claim Testnet Tokens</div>
+      <div class="step-desc">Visit the SoDEX faucet to claim free vUSDC test tokens. You need at least $10 vUSDC to execute a test trade through OvoWorks.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Launch the Copilot</div>
+      <div class="step-desc">Click "Launch App" to open OvoWorks. Ask it anything — "What are institutions doing with BTC?" or click "Market brief" to see live data in action.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-title">Generate a Signal</div>
+      <div class="step-desc">Click the ⚡ Live Signal button. OvoWorks pulls live SoSoValue ETF flows + CoinGecko prices and generates a BUY/SELL/HOLD signal with confidence scoring.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">5</div>
+      <div class="step-title">Execute a Trade</div>
+      <div class="step-desc">From the signal panel, select BTC, set $10 amount, choose Spot or Leverage, and click BUY/LONG. The trade executes on SoDEX testnet via EIP-712 signing.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">6</div>
+      <div class="step-title">Verify On-Chain</div>
+      <div class="step-desc">Every trade is verifiable on ValueChain testnet explorer. Search wallet 0x95Cc...680fe to see all OvoWorks executed orders with their order IDs.</div>
+    </div>
   </div>
-  <div id="historyContent"></div>
-</div>
 
-  <div class="inputbar">
-    <input
-      type="text"
-      id="userInput"
-      placeholder="Ask OvoWorks anything about crypto markets..."
-      onkeydown="if(event.key==='Enter') sendMsg()"
-    />
-  
-    <button class="send-btn" id="sendBtn" onclick="sendMsg()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+  <div style="background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:24px;margin-top:32px">
+    <div style="font-size:13px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:12px">QUICK LINKS FOR JUDGES</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px">
+      <a href="/app.html" style="padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:20px;color:white;font-size:13px;font-weight:700;text-decoration:none">🚀 Launch OvoWorks</a>
+      <a href="https://testnet.sodex.com/faucet" target="_blank" style="padding:10px 20px;background:rgba(29,158,117,0.1);border:1px solid var(--green);border-radius:20px;color:var(--green);font-size:13px;font-weight:700;text-decoration:none">💧 Get Test Tokens</a>
+      <a href="https://github.com/Emmanuelovo/ovoworks-Onchain-Copilot" target="_blank" style="padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:13px;font-weight:700;text-decoration:none">📁 GitHub Repo</a>
+      <a href="https://testnet-explorer.valuechain.dev" target="_blank" style="padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:13px;font-weight:700;text-decoration:none">🔍 Verify Trades</a>
+    </div>
   </div>
+</section>
 
-  <div class="footer">OvoWorks · Built on SoSoValue Infrastructure · SoSoValue Buildathon 2026</div>
+<div class="divider"></div>
 
-</div>
+<!-- LIVE INTEGRATIONS -->
+<section id="integrations">
+  <span class="section-badge">LIVE INTEGRATIONS</span>
+  <h2 class="section-title">Every integration is live right now</h2>
+  <p class="section-sub">Not mocked. Not simulated. Every data source and execution layer is running live on testnet.</p>
+
+  <div class="sources-grid">
+    <div class="source-card" id="sosoStatus">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="source-icon" style="background:rgba(244,132,95,0.1);margin:0">📊</div>
+        <div>
+          <div class="source-name">SoSoValue Terminal API</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="status-dot"></div>
+            <span style="font-size:12px;color:var(--green)">Live</span>
+          </div>
+        </div>
+      </div>
+      <div id="sosoLiveData" style="font-size:13px;color:var(--dim)">Loading live data...</div>
+    </div>
+
+    <div class="source-card" id="geckoStatus">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="source-icon" style="background:rgba(29,158,117,0.1);margin:0">🦎</div>
+        <div>
+          <div class="source-name">CoinGecko API</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="status-dot"></div>
+            <span style="font-size:12px;color:var(--green)">Live</span>
+          </div>
+        </div>
+      </div>
+      <div id="geckoLiveData" style="font-size:13px;color:var(--dim)">Loading live data...</div>
+    </div>
+
+    <div class="source-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="source-icon" style="background:rgba(59,130,246,0.1);margin:0">⚡</div>
+        <div>
+          <div class="source-name">SoDEX Testnet</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="status-dot"></div>
+            <span style="font-size:12px;color:var(--green)">Live</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--dim)">
+        <div style="margin-bottom:6px">✅ Spot trading — 8 pairs</div>
+        <div style="margin-bottom:6px">✅ Perpetuals — up to 25x leverage</div>
+        <div style="margin-bottom:6px">✅ EIP-712 order signing</div>
+        <div>✅ ValueChain block confirmation</div>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="source-icon" style="background:rgba(139,92,246,0.1);margin:0">🤖</div>
+        <div>
+          <div class="source-name">Claude Sonnet 4.6</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="status-dot"></div>
+            <span style="font-size:12px;color:var(--green)">Live</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--dim)">
+        <div style="margin-bottom:6px">✅ Real-time market analysis</div>
+        <div style="margin-bottom:6px">✅ Signal generation engine</div>
+        <div style="margin-bottom:6px">✅ Session memory active</div>
+        <div>✅ Source transparency enabled</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TRADER'S BEHAVIOR -->
+<section id="trader-behavior">
+  <span class="section-badge">TRADER'S BEHAVIOR</span>
+  <h2 class="section-title">Your on-chain trading profile</h2>
+  <p class="section-sub">Connect your wallet to see your trade history from ValueChain and analyse your trading patterns.</p>
+
+  <div id="traderBehaviorContent">
+    <div class="wallet-section" style="max-width:600px">
+      <div style="font-size:48px;margin-bottom:16px">📊</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Connect your wallet</div>
+      <div style="color:var(--dim);font-size:14px;margin-bottom:24px">Your trade history from ValueChain will be analysed and displayed here</div>
+      <button class="nav-wallet-btn" style="margin:0 auto;display:block;padding:12px 28px;font-size:15px" onclick="openWalletModal()">Connect Wallet</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEE CALCULATOR -->
+<section id="calculator">
+  <span class="section-badge">FEE CALCULATOR</span>
+  <h2 class="section-title">Calculate your SoDEX trading costs</h2>
+  <p class="section-sub">Know your fees, breakeven point, and net profit before you place a trade on SoDEX.</p>
+
+  <div class="calc-wrap">
+    <div class="calc-header">⚡ SoDEX Fee Calculator</div>
+    <div class="calc-body">
+      <div class="calc-grid">
+        <div>
+          <label class="calc-label">Your Capital ($)</label>
+          <input class="calc-input" type="number" id="c-capital" value="100" oninput="calcFees()"/>
+        </div>
+        <div>
+          <label class="calc-label">Leverage (x)</label>
+          <input class="calc-input" type="number" id="c-leverage" value="1" min="1" max="25" oninput="calcFees()"/>
+        </div>
+        <div>
+          <label class="calc-label">Order Type</label>
+          <select class="calc-select" id="c-ordertype" onchange="calcFees()">
+            <option value="taker">Market Order (Taker — 0.065%)</option>
+            <option value="maker">Limit Order (Maker — 0.035%)</option>
+          </select>
+        </div>
+        <div>
+          <label class="calc-label">Market</label>
+          <select class="calc-select" id="c-market" onchange="calcFees()">
+            <option value="spot">Spot</option>
+            <option value="perps">Perpetuals</option>
+          </select>
+        </div>
+        <div>
+          <label class="calc-label">Funding Rate per 8h (%)</label>
+          <input class="calc-input" type="number" id="c-funding" value="0.00125" step="0.0001" oninput="calcFees()"/>
+        </div>
+        <div>
+          <label class="calc-label">Hold Duration (hours)</label>
+          <input class="calc-input" type="number" id="c-hours" value="24" oninput="calcFees()"/>
+        </div>
+        <div>
+          <label class="calc-label">Target Profit (%)</label>
+          <input class="calc-input" type="number" id="c-target" value="2" step="0.1" oninput="calcFees()"/>
+        </div>
+        <div>
+          <label class="calc-label">Asset</label>
+          <select class="calc-select" id="c-asset" onchange="calcFees()">
+            <option value="BTC">BTC (Spot & Perps)</option>
+            <option value="ETH">ETH (Spot & Perps)</option>
+            <option value="SOL">SOL (Spot & Perps)</option>
+            <option value="DOGE">DOGE (Spot & Perps)</option>
+            <option value="BNB">BNB (Spot)</option>
+            <option value="XRP">XRP (Spot)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fee-breakdown" id="feeBreakdown"></div>
+
+      <div class="calc-results" id="calcResults"></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WALLET SECTION -->
+<section id="wallet">
+  <span class="section-badge">YOUR WALLET</span>
+  <h2 class="section-title" style="text-align:center">Connect to start trading</h2>
+  <p class="section-sub" style="margin:0 auto 40px;text-align:center">Connect your MetaMask wallet to see your SoDEX testnet balance and claim free test tokens</p>
+
+  <div class="wallet-section" id="walletDisplay">
+    <div style="font-size:48px;margin-bottom:16px">🦊</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:8px">Wallet not connected</div>
+    <div style="color:var(--dim);font-size:14px;margin-bottom:24px">Connect MetaMask to see your testnet balance</div>
+    <button class="nav-wallet-btn" style="margin:0 auto;display:block;padding:12px 28px;font-size:15px" onclick="openWalletModal()">Connect MetaMask</button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="margin-bottom:16px">
+    <strong style="color:var(--text)">OvoWorks</strong> — OnChain Finance Copilot
+  </div>
+  <div style="margin-bottom:12px">
+    Built on <a href="https://sosovalue.com" target="_blank">SoSoValue</a> ·
+    Powered by <a href="https://sodex.com" target="_blank">SoDEX</a> ·
+    AI by <a href="https://anthropic.com" target="_blank">Anthropic</a>
+  </div>
+  <div style="margin-bottom:12px">
+    <a href="https://ovoworks-onchain-copilot.onrender.com/app.html" target="_blank">Launch App</a> ·
+    <a href="https://github.com/Emmanuelovo/ovoworks-Onchain-Copilot" target="_blank">GitHub</a> ·
+    <a href="https://testnet.sodex.com/faucet" target="_blank">Get Testnet Tokens</a>
+  </div>
+  <div style="color:var(--dim)">SoSoValue Buildathon 2026 · Wave 3</div>
+</footer>
 
 <script>
-  const msgsEl = document.getElementById('messages');
-  const inputEl = document.getElementById('userInput');
-  const sendBtn = document.getElementById('sendBtn');
-  let conversationHistory = [];
-const sessionId = 'session-' + Date.now();
+// ── CAROUSEL ──
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const cdots = document.querySelectorAll('.cdot');
 
-  function addMsg(role, content, isHTML = false) {
-    const div = document.createElement('div');
-    div.className = 'msg ' + role;
-    const av = document.createElement('div');
-    av.className = 'avatar ' + role;
-    av.textContent = role === 'ai' ? 'OW' : 'U';
-    const bub = document.createElement('div');
-    bub.className = 'bubble';
-    if (isHTML) bub.innerHTML = content;
-    else bub.textContent = content;
-    div.appendChild(av);
-    div.appendChild(bub);
-    msgsEl.appendChild(div);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-  }
-
-  function addTyping() {
-    const div = document.createElement('div');
-    div.className = 'msg ai';
-    div.id = 'typing';
-    div.innerHTML = `
-      <div class="avatar ai">OW</div>
-      <div class="bubble">
-        <div class="typing"><span></span><span></span><span></span></div>
-      </div>`;
-    msgsEl.appendChild(div);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-  }
-
-  function removeTyping() {
-    const t = document.getElementById('typing');
-    if (t) t.remove();
-  }
-
-  function ask(q) {
-    inputEl.value = q;
-    sendMsg();
-  }
-
-  async function sendMsg() {
-    const val = inputEl.value.trim();
-    if (!val) return;
-
-    addMsg('user', val);
-    conversationHistory.push({ role: 'user', content: val });
-    inputEl.value = '';
-    sendBtn.disabled = true;
-    addTyping();
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory, sessionId: sessionId })
-      });
-
-      const data = await res.json();
-      removeTyping();
-      sendBtn.disabled = false;
-
-      if (data.reply) {
-  conversationHistory.push({ role: 'assistant', content: data.reply });
-  
-  // Build dynamic source tags
-  const sourceTags = data.sources && data.sources.length
-    ? data.sources.map(s => `<span class="source-tag">${s}</span>`).join(' ')
-    : '<span class="source-tag">OVOWORKS · CLAUDE AI</span>';
-
-  const formatted = `<div style="margin-bottom:8px">${sourceTags}</div>` +
-    data.reply.replace(/\n/g, '<br/>');
-  addMsg('ai', formatted, true);
-      } else {
-        addMsg('ai', '⚠️ Something went wrong. Please try again.');
-      }
-
-    } catch (err) {
-      removeTyping();
-      sendBtn.disabled = false;
-      addMsg('ai', '⚠️ Could not connect to server. Make sure the server is running.');
-    }
-  }
-
-  async function generateSignal() {
-  const panel = document.getElementById('signalPanel');
-  const body = document.getElementById('signalBody');
-  panel.style.display = 'block';
-  body.innerHTML = '<div class="signal-loading"><div class="typing"><span></span><span></span><span></span></div><br>Analysing live market data...</div>';
-
-  try {
-    const res = await fetch('/api/signal');
-    const data = await res.json();
-
-    if (data.signal) {
-      const s = data.signal;
-      const dirClass = s.direction.toLowerCase();
-      const sodexUrl = `https://testnet.sodex.com/trade?symbol=BTC_USDC&side=${s.direction}`;
-
-    body.innerHTML = `
-  <div class="signal-cards">
-    <div class="signal-card">
-      <div class="signal-card-label">SIGNAL</div>
-      <div class="signal-card-value ${dirClass}">${s.direction}</div>
-    </div>
-    <div class="signal-card">
-      <div class="signal-card-label">CONFIDENCE</div>
-      <div class="signal-card-value">${s.confidence}%</div>
-    </div>
-    <div class="signal-card">
-      <div class="signal-card-label">BTC PRICE</div>
-      <div class="signal-card-value">$${s.price}</div>
-    </div>
-    <div class="signal-card">
-      <div class="signal-card-label">ETF FLOW</div>
-      <div class="signal-card-value ${s.etfFlow > 0 ? 'buy' : 'sell'}">${s.etfFlow > 0 ? '+' : ''}$${s.etfFlow}M</div>
-    </div>
-  </div>
-  <div class="signal-action">${s.reasoning}</div>
-
-  <div class="trade-panel">
-    <div class="trade-row">
-      <select class="trade-select" id="tradeAsset">
-        <option value="BTC">Bitcoin (BTC)</option>
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="SOL">Solana (SOL)</option>
-      </select>
-      <input class="trade-input" type="number" id="tradeAmount" value="10" min="5" placeholder="USD Amount" />
-    </div>
-    <div class="trade-row">
-      <select class="trade-select" id="tradeLeverage">
-        <option value="0">Spot (No Leverage)</option>
-        <option value="3">3x Leverage</option>
-        <option value="5">5x Leverage</option>
-        <option value="10">10x Leverage</option>
-      </select>
-      <div class="trade-side-btns">
-        <button class="trade-side-btn buy" onclick="executeTrade('BUY', '${s.direction}')">⬆ BUY / LONG</button>
-        <button class="trade-side-btn sell" onclick="executeTrade('SELL', '${s.direction}')">⬇ SELL / SHORT</button>
-      </div>
-    </div>
-    <div id="tradeResult"></div>
-  </div>
-`;
-}
-  } catch (err) {
-    body.innerHTML = '<div class="signal-loading">⚠️ Could not generate signal. Try again.</div>';
-  }
+function goSlide(n) {
+  slides[currentSlide].classList.remove('active');
+  cdots[currentSlide].classList.remove('active');
+  currentSlide = n;
+  slides[currentSlide].classList.add('active');
+  cdots[currentSlide].classList.add('active');
 }
 
-function closeSignal() {
-  document.getElementById('signalPanel').style.display = 'none';
+setInterval(() => {
+  goSlide((currentSlide + 1) % slides.length);
+}, 3500);
+
+// ── WALLET MODAL ──
+function openWalletModal() {
+  document.getElementById('walletModal').classList.add('open');
 }
 
-let historyVisible = false;
-let activeTab = 'signals';
-
-function toggleHistory() {
-  historyVisible = !historyVisible;
-  const panel = document.getElementById('historyPanel');
-  if (historyVisible) {
-    panel.style.display = 'block';
-    loadHistory();
-  } else {
-    panel.style.display = 'none';
-  }
+function closeWalletModal() {
+  document.getElementById('walletModal').classList.remove('open');
 }
 
-function closeHistory() {
-  historyVisible = false;
-  document.getElementById('historyPanel').style.display = 'none';
-}
-
-function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
-  renderHistory();
-}
-
-let signalHistoryData = [];
-let tradeHistoryData = [];
-
-async function loadHistory() {
-  try {
-    const [sigRes, trdRes] = await Promise.all([
-      fetch('/api/signal/history'),
-      fetch('/api/trade/history')
-    ]);
-    const sigData = await sigRes.json();
-    const trdData = await trdRes.json();
-    signalHistoryData = sigData.history || [];
-    tradeHistoryData = trdData.history || [];
-    renderHistory();
-  } catch (err) {
-    console.error('History load error:', err);
-  }
-}
-
-function renderHistory() {
-  const content = document.getElementById('historyContent');
-
-  if (activeTab === 'signals') {
-    if (signalHistoryData.length === 0) {
-      content.innerHTML = '<div class="history-empty">No signals yet. Click ⚡ to generate your first signal.</div>';
-      return;
-    }
-    content.innerHTML = signalHistoryData.map(s => `
-      <div class="history-item">
-        <div class="history-badge ${s.direction}">${s.direction}</div>
-        <div class="history-info">
-          <div class="history-info-top">BTC $${Number(s.price).toLocaleString()} · ${s.confidence}% confidence</div>
-          <div class="history-info-bottom">${s.reasoning}</div>
-        </div>
-        <div class="history-meta">
-          <div>${s.time}</div>
-          <div>${s.date}</div>
-        </div>
-      </div>
-    `).join('');
-
-  } else {
-    if (tradeHistoryData.length === 0) {
-      content.innerHTML = '<div class="history-empty">No trades executed yet. Generate a signal and execute on SoDEX.</div>';
-      return;
-    }
-    content.innerHTML = tradeHistoryData.map(t => `
-      <div class="history-item">
-        <div class="history-badge ${t.side}">${t.side}</div>
-        <div class="history-info">
-          <div class="history-info-top">BTC · ${t.quantity} BTC @ $${Number(t.price).toLocaleString()}</div>
-          <div class="history-info-bottom">SoDEX Testnet · ${t.status}</div>
-        </div>
-        <div class="history-meta">
-          <div>${t.time}</div>
-          <div>${t.date}</div>
-        </div>
-      </div>
-    `).join('');
-  }
-}
-
-let etfChartInstance = null;
-let etfData = { btc: [], eth: [] };
-let activeChartTab = 'btc';
-
-async function showETFChart() {
-  const panel = document.getElementById('chartPanel');
-  panel.style.display = 'block';
-  document.getElementById('chartContent').innerHTML = `
-    <div class="chart-loading">
-      <div class="typing"><span></span><span></span><span></span></div>
-      <br>Loading ETF flow data...
-    </div>`;
-
-  try {
-    const res = await fetch('/api/etf-history');
-    etfData = await res.json();
-    renderChart(activeChartTab);
-  } catch (err) {
-    document.getElementById('chartContent').innerHTML =
-      '<div class="chart-loading">⚠️ Could not load ETF data.</div>';
-  }
-}
-
-function closeChart() {
-  document.getElementById('chartPanel').style.display = 'none';
-  if (etfChartInstance) {
-    etfChartInstance.destroy();
-    etfChartInstance = null;
-  }
-}
-
-function switchChartTab(tab) {
-  activeChartTab = tab;
-  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`ctab-${tab}`).classList.add('active');
-  renderChart(tab);
-}
-
-function renderChart(tab) {
-  document.getElementById('chartContent').innerHTML = `
-    <div class="chart-container">
-      <canvas id="etfChart"></canvas>
-    </div>
-    <div class="chart-summary" id="chartSummary"></div>`;
-
-  const data = etfData[tab] || [];
-  if (!data.length) {
-    document.getElementById('chartContent').innerHTML =
-      '<div class="chart-loading">No ETF data available.</div>';
+async function connectMetaMask() {
+  if (typeof window.ethereum === 'undefined') {
+    alert('MetaMask not found! Please install MetaMask first.');
+    window.open('https://metamask.io/download/', '_blank');
     return;
   }
 
-  const labels = data.map(d => d.date || '');
-  const values = data.map(d => d.inflow || 0);
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const address = accounts[0];
+    closeWalletModal();
+    await onWalletConnected(address);
+  } catch (err) {
+    alert('Connection rejected: ' + err.message);
+  }
+}
 
-  const colors = values.map(v => v >= 0 ? 'rgba(29, 158, 117, 0.8)' : 'rgba(226, 75, 74, 0.8)');
-  const borders = values.map(v => v >= 0 ? '#1D9E75' : '#E24B4A');
+async function onWalletConnected(address) {
+  // Update nav button
+  const btn = document.getElementById('walletBtn');
+  btn.textContent = address.slice(0,6) + '...' + address.slice(-4);
+  btn.style.background = 'rgba(29,158,117,0.2)';
+  btn.style.border = '1px solid #1D9E75';
+  btn.style.color = '#1D9E75';
 
-  const ctx = document.getElementById('etfChart').getContext('2d');
-  if (etfChartInstance) etfChartInstance.destroy();
+  // Update wallet display section
+  const display = document.getElementById('walletDisplay');
+  display.innerHTML = `
+    <div style="font-size:48px;margin-bottom:16px">✅</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px">Wallet Connected</div>
+    <div class="wallet-address">${address}</div>
+    <div class="wallet-balance" id="walletBalanceVal">Loading...</div>
+    <div style="color:var(--dim);font-size:13px;margin-bottom:16px">SoDEX Testnet Balance</div>
+    <div class="wallet-coins" id="walletCoins"></div>
+    <a class="faucet-btn" href="https://testnet.sodex.com/faucet" target="_blank">
+      💧 Claim Testnet Tokens
+    </a>
+    <button onclick="disconnectWallet()" style="display:block;margin:16px auto 0;background:none;border:1px solid var(--border);color:var(--dim);padding:8px 20px;border-radius:20px;cursor:pointer;font-size:13px">
+      Disconnect
+    </button>
+  `;
 
-  etfChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: `${tab.toUpperCase()} ETF Daily Net Inflow ($M)`,
-        data: values,
-        backgroundColor: colors,
-        borderColor: borders,
-        borderWidth: 1,
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const v = ctx.raw;
-              return `${v >= 0 ? '+' : ''}$${v.toFixed(1)}M`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#a06040',
-            font: { size: 10 },
-            maxRotation: 45
-          },
-          grid: { color: '#1a0a00' }
-        },
-        y: {
-          ticks: {
-            color: '#a06040',
-            font: { size: 10 },
-            callback: v => `$${v}M`
-          },
-          grid: { color: '#3D1F0A' }
-        }
-      }
+  // Fetch balance from OvoWorks API
+  try {
+    const res = await fetch('/api/portfolio');
+    const data = await res.json();
+    const spot = data.spot || [];
+    const total = data.summary?.totalSpotValue || '0';
+
+    document.getElementById('walletBalanceVal').textContent = '$' + Number(total).toLocaleString();
+
+    const coinsEl = document.getElementById('walletCoins');
+    coinsEl.innerHTML = spot.map(b => `
+      <div class="wallet-coin">
+        <div class="wallet-coin-name">${b.coin.replace('v','')}</div>
+        <div class="wallet-coin-val">${parseFloat(b.total).toFixed(4)}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('walletBalanceVal').textContent = 'Balance unavailable';
+  }
+}
+
+function disconnectWallet() {
+  const btn = document.getElementById('walletBtn');
+  btn.textContent = 'Connect Wallet';
+  btn.style.background = '';
+  btn.style.border = '';
+  btn.style.color = '';
+
+  document.getElementById('walletDisplay').innerHTML = `
+    <div style="font-size:48px;margin-bottom:16px">🦊</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:8px">Wallet not connected</div>
+    <div style="color:var(--dim);font-size:14px;margin-bottom:24px">Connect MetaMask to see your testnet balance</div>
+    <button class="nav-wallet-btn" style="margin:0 auto;display:block;padding:12px 28px;font-size:15px" onclick="openWalletModal()">Connect MetaMask</button>
+  `;
+}
+
+// Auto-reconnect if already connected
+window.addEventListener('load', async () => {
+  if (typeof window.ethereum !== 'undefined') {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length > 0) {
+      await onWalletConnected(accounts[0]);
     }
-  });
+  }
+});
 
-  // Summary cards
-  const total = values.reduce((a, b) => a + b, 0);
-  const avg = total / values.length;
-  const positive = values.filter(v => v > 0).length;
-  const latest = values[values.length - 1];
+// ── FEE CALCULATOR ──
+const SODEX_FEES = {
+  spot:  { maker: 0.00035, taker: 0.00065 },
+  perps: { maker: 0.00012, taker: 0.00040 }
+};
 
-  document.getElementById('chartSummary').innerHTML = `
-    <div class="chart-summary-card">
-      <div class="chart-summary-label">14-DAY TOTAL</div>
-      <div class="chart-summary-value ${total >= 0 ? 'positive' : 'negative'}">${total >= 0 ? '+' : ''}$${total.toFixed(0)}M</div>
+function calcFees() {
+  const capital   = parseFloat(document.getElementById('c-capital').value) || 0;
+  const leverage  = parseFloat(document.getElementById('c-leverage').value) || 1;
+  const orderType = document.getElementById('c-ordertype').value;
+  const market    = document.getElementById('c-market').value;
+  const funding   = parseFloat(document.getElementById('c-funding').value) || 0;
+  const hours     = parseFloat(document.getElementById('c-hours').value) || 0;
+  const target    = parseFloat(document.getElementById('c-target').value) || 0;
+
+  const feeRate     = SODEX_FEES[market][orderType];
+  const position    = capital * leverage;
+  const openFee     = position * feeRate;
+  const closeFee    = position * feeRate;
+  const fundPeriods = market === 'perps' ? Math.floor(hours / 8) : 0;
+  const fundFee     = position * (funding / 100) * fundPeriods;
+  const totalFees   = openFee + closeFee + fundFee;
+  const grossProfit = position * (target / 100);
+  const netProfit   = grossProfit - totalFees;
+  const breakeven   = (totalFees / position) * 100;
+  const roi         = (netProfit / capital) * 100;
+
+  document.getElementById('feeBreakdown').innerHTML = `
+    <div class="fee-row"><span class="fee-row-label">Platform</span><span>SoDEX (${market === 'spot' ? 'Spot' : 'Perpetuals'})</span></div>
+    <div class="fee-row"><span class="fee-row-label">Position Size</span><span>$${position.toFixed(2)}</span></div>
+    <div class="fee-row"><span class="fee-row-label">Open Fee (${(feeRate*100).toFixed(3)}%)</span><span style="color:var(--red)">-$${openFee.toFixed(4)}</span></div>
+    <div class="fee-row"><span class="fee-row-label">Close Fee (${(feeRate*100).toFixed(3)}%)</span><span style="color:var(--red)">-$${closeFee.toFixed(4)}</span></div>
+    ${market === 'perps' ? `<div class="fee-row"><span class="fee-row-label">Funding (${fundPeriods} periods)</span><span style="color:var(--red)">-$${fundFee.toFixed(4)}</span></div>` : ''}
+    <div class="fee-row"><span class="fee-row-label">Total Fees</span><span style="color:var(--red)">-$${totalFees.toFixed(4)}</span></div>
+  `;
+
+  document.getElementById('calcResults').innerHTML = `
+    <div class="calc-result-box">
+      <div class="calc-result-val ${netProfit >= 0 ? 'green' : 'red'}">$${netProfit.toFixed(2)}</div>
+      <div class="calc-result-label">Net Profit</div>
     </div>
-    <div class="chart-summary-card">
-      <div class="chart-summary-label">DAILY AVG</div>
-      <div class="chart-summary-value ${avg >= 0 ? 'positive' : 'negative'}">${avg >= 0 ? '+' : ''}$${avg.toFixed(0)}M</div>
+    <div class="calc-result-box">
+      <div class="calc-result-val ${roi >= 0 ? 'green' : 'red'}">${roi.toFixed(2)}%</div>
+      <div class="calc-result-label">ROI on Capital</div>
     </div>
-    <div class="chart-summary-card">
-      <div class="chart-summary-label">INFLOW DAYS</div>
-      <div class="chart-summary-value positive">${positive}/14</div>
+    <div class="calc-result-box">
+      <div class="calc-result-val orange">${breakeven.toFixed(4)}%</div>
+      <div class="calc-result-label">Breakeven Move</div>
     </div>
-    <div class="chart-summary-card">
-      <div class="chart-summary-label">LATEST</div>
-      <div class="chart-summary-value ${latest >= 0 ? 'positive' : 'negative'}">${latest >= 0 ? '+' : ''}$${latest.toFixed(0)}M</div>
+    <div class="calc-result-box">
+      <div class="calc-result-val" style="color:var(--dim)">$${totalFees.toFixed(4)}</div>
+      <div class="calc-result-label">Total Fees</div>
     </div>
   `;
 }
 
-async function executeTrade(side, signal) {
-  const asset = document.getElementById('tradeAsset').value;
-  const amount = parseFloat(document.getElementById('tradeAmount').value);
-  const leverage = parseInt(document.getElementById('tradeLeverage').value);
-  const resultEl = document.getElementById('tradeResult');
+calcFees();
+// ── LIVE INTEGRATIONS ──
+async function loadLiveIntegrations() {
+  // SoSoValue data
+  try {
+    const res = await fetch('/api/etf-history');
+    const data = await res.json();
+    const btc = data.btc || [];
+    const latest = btc[btc.length - 1];
+    const inflow = latest?.inflow || 0;
+    const inflowStr = inflow >= 0
+      ? `<span style="color:var(--green)">+$${inflow.toFixed(0)}M</span>`
+      : `<span style="color:var(--red)">-$${Math.abs(inflow).toFixed(0)}M</span>`;
 
-  if (amount < 5) {
-    resultEl.innerHTML = '<div class="trade-result-error">⚠️ Minimum trade amount is $5</div>';
-    return;
+    document.getElementById('sosoLiveData').innerHTML = `
+      <div style="margin-bottom:6px">✅ ETF flow data — active</div>
+      <div style="margin-bottom:6px">✅ News feed — streaming</div>
+      <div style="margin-bottom:6px">✅ Currency news — filterable</div>
+      <div>📊 Latest BTC ETF daily flow: ${inflowStr}</div>
+    `;
+  } catch(e) {
+    document.getElementById('sosoLiveData').innerHTML = '⚠️ Data loading...';
   }
 
-  // Disable buttons while trading
-  document.querySelectorAll('.trade-side-btn').forEach(b => b.disabled = true);
-  resultEl.innerHTML = '<div class="trade-result-success">⏳ Executing trade on SoDEX...</div>';
+  // CoinGecko data
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+    const data = await res.json();
+    const btc = data.bitcoin;
+    const eth = data.ethereum;
+    document.getElementById('geckoLiveData').innerHTML = `
+      <div style="margin-bottom:6px">✅ Live prices — streaming</div>
+      <div style="margin-bottom:6px">BTC: <strong>$${btc?.usd?.toLocaleString()}</strong> <span style="color:${btc?.usd_24h_change >= 0 ? 'var(--green)' : 'var(--red)'}">${btc?.usd_24h_change?.toFixed(2)}%</span></div>
+      <div>ETH: <strong>$${eth?.usd?.toLocaleString()}</strong> <span style="color:${eth?.usd_24h_change >= 0 ? 'var(--green)' : 'var(--red)'}">${eth?.usd_24h_change?.toFixed(2)}%</span></div>
+    `;
+  } catch(e) {
+    document.getElementById('geckoLiveData').innerHTML = '⚠️ Data loading...';
+  }
+}
+
+// ── TRADER BEHAVIOR ──
+async function loadTraderBehavior(address) {
+  const content = document.getElementById('traderBehaviorContent');
+  content.innerHTML = `
+    <div style="text-align:center;padding:40px;color:var(--dim)">
+      <div class="typing" style="justify-content:center;margin-bottom:12px">
+        <span></span><span></span><span></span>
+      </div>
+      Loading trade history from ValueChain...
+    </div>`;
 
   try {
-    const isSpot = leverage === 0;
-    const endpoint = isSpot ? '/api/trade/spot' : '/api/trade/futures';
-
-    const body = isSpot
-      ? { asset, side, usdAmount: amount }
-      : { asset, side: side === 'BUY' ? 'LONG' : 'SHORT', usdAmount: amount, leverage };
-
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
+    const res = await fetch('/api/trade/history');
     const data = await res.json();
+    const trades = data.history || [];
 
-    if (data.success) {
-      const typeLabel = isSpot ? 'SPOT' : `FUTURES ${leverage}x`;
-      resultEl.innerHTML = `
-        <div class="trade-result-success">
-          ✅ ${typeLabel} ${side} executed on SoDEX!<br/>
-          ${data.quantity} ${asset} @ $${Number(data.price).toLocaleString()}<br/>
-          Order ID: ${data.orderID}
+    if (trades.length === 0) {
+      content.innerHTML = `
+        <div class="wallet-section" style="max-width:600px">
+          <div style="font-size:48px;margin-bottom:16px">📭</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px">No Trade Data</div>
+          <div style="color:var(--dim);font-size:14px;margin-bottom:24px">No trades found for wallet ${address.slice(0,6)}...${address.slice(-4)}. Execute your first trade through OvoWorks to see your behavior analysis.</div>
+          <a href="/app.html" class="cta-primary" style="display:inline-flex;margin:0 auto">🚀 Start Trading</a>
         </div>`;
-
-      // Save to trade history
-      await fetch('/api/trade/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          side: isSpot ? side : (side === 'BUY' ? 'LONG' : 'SHORT'),
-          asset,
-          quantity: data.quantity,
-          price: data.price,
-          usdAmount: amount,
-          leverage: isSpot ? 1 : leverage,
-          type: isSpot ? 'SPOT' : 'FUTURES',
-          orderID: data.orderID
-        })
-      });
-
-    } else {
-      resultEl.innerHTML = `<div class="trade-result-error">❌ Trade failed: ${data.error}</div>`;
+      return;
     }
 
-  } catch (err) {
-    resultEl.innerHTML = `<div class="trade-result-error">❌ Connection error. Try again.</div>`;
-  }
+    // Analyse trade data
+    const buys = trades.filter(t => t.side === 'BUY' || t.side === 'LONG').length;
+    const sells = trades.filter(t => t.side === 'SELL' || t.side === 'SHORT').length;
+    const spotTrades = trades.filter(t => t.type === 'SPOT').length;
+    const futuresTrades = trades.filter(t => t.type === 'FUTURES').length;
+    const totalVolume = trades.reduce((sum, t) => sum + parseFloat(t.usdAmount || 0), 0);
+    const avgSize = totalVolume / trades.length;
+    const assets = {};
+    trades.forEach(t => { assets[t.asset] = (assets[t.asset] || 0) + 1; });
+    const topAsset = Object.entries(assets).sort((a,b) => b[1]-a[1])[0];
 
-  document.querySelectorAll('.trade-side-btn').forEach(b => b.disabled = false);
+    content.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px">
+        <div class="ssi-card">
+          <div class="ssi-name">Total Trades</div>
+          <div style="font-size:28px;font-weight:800;color:var(--text);margin-top:4px">${trades.length}</div>
+        </div>
+        <div class="ssi-card">
+          <div class="ssi-name">Total Volume</div>
+          <div style="font-size:28px;font-weight:800;color:var(--text);margin-top:4px">$${totalVolume.toFixed(0)}</div>
+        </div>
+        <div class="ssi-card">
+          <div class="ssi-name">Avg Trade Size</div>
+          <div style="font-size:28px;font-weight:800;color:var(--text);margin-top:4px">$${avgSize.toFixed(0)}</div>
+        </div>
+        <div class="ssi-card">
+          <div class="ssi-name">Favourite Asset</div>
+          <div style="font-size:28px;font-weight:800;color:var(--accent);margin-top:4px">${topAsset ? topAsset[0] : 'N/A'}</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px">
+        <div class="source-card">
+          <canvas id="directionChart" height="200"></canvas>
+        </div>
+        <div class="source-card">
+          <canvas id="typeChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="source-card">
+        <div class="source-name" style="margin-bottom:16px">Recent Trade History</div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tr>
+            <th style="text-align:left;color:var(--dim);padding:8px;border-bottom:1px solid var(--border)">Time</th>
+            <th style="text-align:left;color:var(--dim);padding:8px;border-bottom:1px solid var(--border)">Asset</th>
+            <th style="text-align:left;color:var(--dim);padding:8px;border-bottom:1px solid var(--border)">Side</th>
+            <th style="text-align:left;color:var(--dim);padding:8px;border-bottom:1px solid var(--border)">Type</th>
+            <th style="text-align:left;color:var(--dim);padding:8px;border-bottom:1px solid var(--border)">Amount</th>
+            <th style="text-align:left;color:var(--dim);padding:8px;border-bottom:1px solid var(--border)">Order ID</th>
+          </tr>
+          ${trades.slice(0,10).map(t => `
+            <tr>
+              <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--dim)">${t.time} ${t.date}</td>
+              <td style="padding:8px;border-bottom:1px solid var(--border);font-weight:700">${t.asset}</td>
+              <td style="padding:8px;border-bottom:1px solid var(--border);color:${t.side === 'BUY' || t.side === 'LONG' ? 'var(--green)' : 'var(--red)'};font-weight:700">${t.side}</td>
+              <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--dim)">${t.type}</td>
+              <td style="padding:8px;border-bottom:1px solid var(--border)">$${t.usdAmount}</td>
+              <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--dim);font-family:monospace;font-size:11px">${t.orderID || 'N/A'}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+
+    // Draw charts
+    setTimeout(() => {
+      // Direction chart
+      new Chart(document.getElementById('directionChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['BUY / LONG', 'SELL / SHORT'],
+          datasets: [{
+            data: [buys, sells],
+            backgroundColor: ['#1D9E75', '#E24B4A'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#a06040', font: { size: 12 } } },
+            title: { display: true, text: 'Trade Direction', color: '#FFF5EE', font: { size: 14, weight: 'bold' } }
+          }
+        }
+      });
+
+      // Type chart
+      new Chart(document.getElementById('typeChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Spot', 'Futures'],
+          datasets: [{
+            data: [spotTrades, futuresTrades],
+            backgroundColor: ['#F4845F', '#8b5cf6'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#a06040', font: { size: 12 } } },
+            title: { display: true, text: 'Trade Type', color: '#FFF5EE', font: { size: 14, weight: 'bold' } }
+          }
+        }
+      });
+    }, 100);
+
+  } catch(e) {
+    content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--dim)">⚠️ Could not load trade data</div>';
+  }
 }
+
+// Load integrations on page load
+window.addEventListener('load', () => {
+  loadLiveIntegrations();
+});
+
+// Update onWalletConnected to also load trader behavior
+const _origOnWalletConnected = onWalletConnected;
+onWalletConnected = async function(address) {
+  await _origOnWalletConnected(address);
+  await loadTraderBehavior(address);
+};
 </script>
 </body>
 </html>

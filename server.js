@@ -225,6 +225,327 @@ async function fetchETFHistory() {
     return { btcList: [], ethList: [] };
   }
 }
+// ── ETF Flow Backtest Engine ────────────────────────────────
+async function runETFBacktest(days = 30, threshold = 100) {
+  try {
+    // Fetch historical ETF data for multiple tickers
+    const tickers = ['ibit', 'fbtc', 'bitb'];
+    const requests = tickers.map(ticker =>
+      axios.get(
+        `https://openapi.sosovalue.com/api/v1/etfs/${ticker}/history?pageNum=1&pageSize=${days + 5}`,
+        { headers: { 'x-soso-api-key': process.env.SOSOVALUE_API_KEY, 'Accept': 'application/json' } }
+      ).catch(() => ({ data: null }))
+    );
+
+    const results = await Promise.all(requests);
+
+    // Aggregate daily flows
+    const flowByDate = {};
+    results.forEach(res => {
+      const list = res.data?.data || [];
+      list.forEach(item => {
+        const date = item.date;
+        const flow = parseFloat(item.net_inflow || 0);
+        if (date) flowByDate[date] = (flowByDate[date] || 0) + flow;
+      });
+    });
+
+    // Get historical BTC prices from CoinGecko
+    const priceRes = await axios.get(
+      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`,
+      { timeout: 10000 }
+    ).catch(() => ({ data: null }));
+
+    const prices = priceRes.data?.prices || [];
+    const priceByDate = {};
+    prices.forEach(([timestamp, price]) => {
+      const date = new Date(timestamp).toISOString().slice(0, 10);
+      priceByDate[date] = price;
+    });
+
+    // Sort dates
+    const sortedDates = Object.keys(flowByDate).sort();
+    const thresholdM = threshold * 1e6;
+
+    // Run backtest
+    let trades = [];
+    let position = null;
+    let portfolioValue = 100; // start with $100
+    let cash = 100;
+    let btcHeld = 0;
+    let portfolioHistory = [];
+
+    sortedDates.forEach((date, i) => {
+      const flow = flowByDate[date];
+      const price = priceByDate[date] || priceByDate[Object.keys(priceByDate).find(d => d >= date)];
+      if (!price) return;
+
+      // Strategy: Buy when flow > threshold, Sell when flow < -threshold
+      if (flow > thresholdM && position !== 'LONG' && cash > 0) {
+        btcHeld = cash / price;
+        cash = 0;
+        position = 'LONG';
+        trades.push({ date, action: 'BUY', price: price.toFixed(0), flow: (flow/1e6).toFixed(0), reason: `Inflow +$${(flow/1e6).toFixed(0)}M > threshold` });
+      } else if (flow < -thresholdM && position === 'LONG' && btcHeld > 0) {
+        cash = btcHeld * price;
+        btcHeld = 0;
+        position = null;
+        trades.push({ date, action: 'SELL', price: price.toFixed(0), flow: (flow/1e6).toFixed(0), reason: `Outflow -$${Math.abs(flow/1e6).toFixed(0)}M < threshold` });
+      }
+
+      // Calculate portfolio value
+      portfolioValue = cash + (btcHeld * price);
+      portfolioHistory.push({
+        date,
+        value: portfolioValue.toFixed(2),
+        flow: (flow/1e6).toFixed(0),
+        price: price.toFixed(0),
+        position: position || 'CASH'
+      });
+    });
+
+    // Calculate stats
+    const finalValue = portfolioValue;
+    const totalReturn = ((finalValue - 100) / 100 * 100).toFixed(2);
+    const winTrades = trades.filter((t, i) => {
+      if (t.action !== 'SELL') return false;
+      const buyTrade = trades.slice(0, i).reverse().find(bt => bt.action === 'BUY');
+      return buyTrade && parseFloat(t.price) > parseFloat(buyTrade.price);
+    }).length;
+    const totalSells = trades.filter(t => t.action === 'SELL').length;
+    const winRate = totalSells > 0 ? ((winTrades / totalSells) * 100).toFixed(0) : 'N/A';
+
+    // BTC buy and hold comparison
+    const firstDate = sortedDates[0];
+    const lastDate = sortedDates[sortedDates.length - 1];
+    const firstPrice = priceByDate[firstDate] || 0;
+    const lastPrice = priceByDate[lastDate] || 0;
+    const btcReturn = firstPrice > 0 ? ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2) : 'N/A';
+
+    return {
+      summary: {
+        days,
+        threshold,
+        totalReturn,
+        finalValue: finalValue.toFixed(2),
+        totalTrades: trades.length,
+        winRate,
+        btcBuyHoldReturn: btcReturn,
+        startDate: firstDate,
+        endDate: lastDate
+      },
+      trades: trades.slice(-20),
+      portfolioHistory: portfolioHistory.slice(-days)
+    };
+
+  } catch(e) {
+    console.error('Backtest error:', e.message);
+    return null;
+  }
+}
+
+// Backtest endpoint
+app.get('/api/backtest', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const threshold = parseInt(req.query.threshold) || 100;
+    const result = await runETFBacktest(days, threshold);
+    if (!result) return res.status(500).json({ error: 'Backtest failed' });
+    res.json(result);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Agentic Monitor Loop ────────────────────────────────────
+let agentStatus = {
+  running: false,
+  lastCheck: null,
+  lastSignal: null,
+  alerts: [],
+  checkCount: 0
+};
+
+async function runAgentLoop() {
+  if (agentStatus.running) return;
+  agentStatus.running = true;
+  console.log('🤖 Agentic monitor loop started');
+
+  const check = async () => {
+    try {
+      agentStatus.checkCount++;
+      agentStatus.lastCheck = new Date().toISOString();
+      console.log(`🤖 Agent check #${agentStatus.checkCount}`);
+
+      const signal = await generateRuleBasedSignal();
+      if (!signal) return;
+
+      agentStatus.lastSignal = signal;
+
+      // Alert conditions
+      if (signal.signal === 'STRONG BUY' || signal.signal === 'STRONG SELL') {
+        const alert = {
+          time: new Date().toLocaleTimeString(),
+          date: new Date().toLocaleDateString(),
+          signal: signal.signal,
+          confidence: signal.confidence,
+          btcPrice: signal.btcPrice,
+          btcFlow: (signal.btcDailyFlow / 1e6).toFixed(0),
+          message: `${signal.signal} signal detected — BTC ETF flow ${signal.btcDailyFlow > 0 ? '+' : ''}$${(signal.btcDailyFlow/1e6).toFixed(0)}M, confidence ${signal.confidence}%`
+        };
+        agentStatus.alerts.unshift(alert);
+        if (agentStatus.alerts.length > 20) agentStatus.alerts.pop();
+        console.log(`🚨 AGENT ALERT: ${alert.message}`);
+      }
+
+    } catch(e) {
+      console.error('Agent loop error:', e.message);
+    }
+  };
+
+  // Run immediately then every 30 minutes
+  await check();
+  setInterval(check, 30 * 60 * 1000);
+}
+
+// Agent status endpoint
+app.get('/api/agent/status', (req, res) => {
+  res.json(agentStatus);
+});
+
+// Start agent loop
+runAgentLoop();
+
+// ── Rule-Based Signal Engine ────────────────────────────────
+async function generateRuleBasedSignal() {
+  try {
+    // Fetch all data in parallel
+    const [btcETF, ethETF, prices, news] = await Promise.all([
+      axios.post(
+        'https://api.sosovalue.xyz/openapi/v2/etf/currentEtfDataMetrics',
+        { type: 'us-btc-spot' },
+        { headers: { 'x-soso-api-key': process.env.SOSOVALUE_API_KEY, 'Content-Type': 'application/json' } }
+      ).catch(() => ({ data: null })),
+      axios.post(
+        'https://api.sosovalue.xyz/openapi/v2/etf/currentEtfDataMetrics',
+        { type: 'us-eth-spot' },
+        { headers: { 'x-soso-api-key': process.env.SOSOVALUE_API_KEY, 'Content-Type': 'application/json' } }
+      ).catch(() => ({ data: null })),
+      axios.get(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true',
+        { timeout: 8000 }
+      ).catch(() => ({ data: {} })),
+      fetchNews()
+    ]);
+
+    const btcData = btcETF.data?.data;
+    const ethData = ethETF.data?.data;
+    const btcPrice = prices.data?.bitcoin?.usd || 0;
+    const btcChange = prices.data?.bitcoin?.usd_24h_change || 0;
+    const ethPrice = prices.data?.ethereum?.usd || 0;
+    const ethChange = prices.data?.ethereum?.usd_24h_change || 0;
+
+    // ── Rule Engine ──────────────────────────────────────────
+    const rules = [];
+    let bullScore = 0;
+    let bearScore = 0;
+
+    // Rule 1: BTC ETF daily inflow
+    const btcDailyFlow = parseFloat(btcData?.dailyNetInflow?.value || 0);
+    if (btcDailyFlow > 300e6) {
+      bullScore += 3;
+      rules.push({ rule: 'BTC ETF Inflow > $300M', signal: 'BULL', weight: 3, value: `+$${(btcDailyFlow/1e6).toFixed(0)}M` });
+    } else if (btcDailyFlow > 100e6) {
+      bullScore += 1;
+      rules.push({ rule: 'BTC ETF Inflow > $100M', signal: 'BULL', weight: 1, value: `+$${(btcDailyFlow/1e6).toFixed(0)}M` });
+    } else if (btcDailyFlow < -300e6) {
+      bearScore += 3;
+      rules.push({ rule: 'BTC ETF Outflow > $300M', signal: 'BEAR', weight: 3, value: `-$${Math.abs(btcDailyFlow/1e6).toFixed(0)}M` });
+    } else if (btcDailyFlow < -100e6) {
+      bearScore += 1;
+      rules.push({ rule: 'BTC ETF Outflow > $100M', signal: 'BEAR', weight: 1, value: `-$${Math.abs(btcDailyFlow/1e6).toFixed(0)}M` });
+    } else {
+      rules.push({ rule: 'BTC ETF Flow Neutral', signal: 'NEUTRAL', weight: 0, value: `$${(btcDailyFlow/1e6).toFixed(0)}M` });
+    }
+
+    // Rule 2: BTC 24h price change
+    if (btcChange > 3) {
+      bullScore += 2;
+      rules.push({ rule: 'BTC 24h Change > +3%', signal: 'BULL', weight: 2, value: `+${btcChange.toFixed(2)}%` });
+    } else if (btcChange > 1) {
+      bullScore += 1;
+      rules.push({ rule: 'BTC 24h Change > +1%', signal: 'BULL', weight: 1, value: `+${btcChange.toFixed(2)}%` });
+    } else if (btcChange < -3) {
+      bearScore += 2;
+      rules.push({ rule: 'BTC 24h Change < -3%', signal: 'BEAR', weight: 2, value: `${btcChange.toFixed(2)}%` });
+    } else if (btcChange < -1) {
+      bearScore += 1;
+      rules.push({ rule: 'BTC 24h Change < -1%', signal: 'BEAR', weight: 1, value: `${btcChange.toFixed(2)}%` });
+    } else {
+      rules.push({ rule: 'BTC 24h Change Neutral', signal: 'NEUTRAL', weight: 0, value: `${btcChange.toFixed(2)}%` });
+    }
+
+    // Rule 3: ETH ETF daily inflow
+    const ethDailyFlow = parseFloat(ethData?.dailyNetInflow?.value || 0);
+    if (ethDailyFlow > 50e6) {
+      bullScore += 1;
+      rules.push({ rule: 'ETH ETF Inflow > $50M', signal: 'BULL', weight: 1, value: `+$${(ethDailyFlow/1e6).toFixed(0)}M` });
+    } else if (ethDailyFlow < -50e6) {
+      bearScore += 1;
+      rules.push({ rule: 'ETH ETF Outflow > $50M', signal: 'BEAR', weight: 1, value: `-$${Math.abs(ethDailyFlow/1e6).toFixed(0)}M` });
+    }
+
+    // Rule 4: BTC vs ETH momentum
+    if (btcChange > 0 && ethChange > 0 && ethChange > btcChange) {
+      bullScore += 1;
+      rules.push({ rule: 'ETH outperforming BTC (risk-on)', signal: 'BULL', weight: 1, value: `ETH ${ethChange.toFixed(1)}% vs BTC ${btcChange.toFixed(1)}%` });
+    } else if (btcChange > ethChange && btcChange > 0) {
+      rules.push({ rule: 'BTC outperforming ETH (defensive)', signal: 'NEUTRAL', weight: 0, value: `BTC ${btcChange.toFixed(1)}% vs ETH ${ethChange.toFixed(1)}%` });
+    }
+
+    // ── Final Signal ─────────────────────────────────────────
+    let signal, confidence;
+    const totalScore = bullScore + bearScore;
+
+    if (bullScore > bearScore + 2) {
+      signal = 'STRONG BUY';
+      confidence = Math.min(95, 60 + bullScore * 5);
+    } else if (bullScore > bearScore) {
+      signal = 'BUY';
+      confidence = Math.min(85, 55 + bullScore * 4);
+    } else if (bearScore > bullScore + 2) {
+      signal = 'STRONG SELL';
+      confidence = Math.min(95, 60 + bearScore * 5);
+    } else if (bearScore > bullScore) {
+      signal = 'SELL';
+      confidence = Math.min(85, 55 + bearScore * 4);
+    } else {
+      signal = 'HOLD';
+      confidence = 50;
+    }
+
+    return {
+      signal,
+      confidence,
+      bullScore,
+      bearScore,
+      rules,
+      btcPrice,
+      btcChange,
+      ethPrice,
+      ethChange,
+      btcDailyFlow,
+      ethDailyFlow,
+      timestamp: new Date().toISOString(),
+      method: 'rule-based'
+    };
+
+  } catch(e) {
+    console.error('Rule signal error:', e.message);
+    return null;
+  }
+}
+
 
 // ── 3. CoinGecko Live Prices ────────────────────────────────────
 async function fetchPrices() {
@@ -619,6 +940,113 @@ app.get('/api/wallet/balance', async (req, res) => {
     res.json({ spot, futures });
   } catch (e) {
     res.status(500).json({ error: 'Balance fetch failed' });
+  }
+});
+
+// ── Portfolio Endpoint ──────────────────────────────────────
+app.get('/api/portfolio', async (req, res) => {
+  try {
+    const address = process.env.WALLET_ADDRESS;
+
+    // Fetch spot balances
+    const spotRes = await axios.get(
+      `https://testnet-gw.sodex.dev/api/v1/spot/accounts/${address.toLowerCase()}/balances`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    const balances = spotRes.data?.data?.balances || [];
+
+    // Fetch open futures positions
+    const perpsRes = await axios.get(
+      `https://testnet-gw.sodex.dev/api/v1/perps/accounts/${address.toLowerCase()}/positions`,
+      { headers: { 'Accept': 'application/json' } }
+    ).catch(() => ({ data: null }));
+    const positions = perpsRes.data?.data || [];
+
+    // Get live prices for portfolio valuation
+    const priceRes = await axios.get(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,ripple,dogecoin&vs_currencies=usd',
+      { timeout: 8000 }
+    ).catch(() => ({ data: {} }));
+    const prices = priceRes.data;
+
+    const btcPrice = prices.bitcoin?.usd || 0;
+const ethPrice = prices.ethereum?.usd || 0;
+const solPrice = prices.solana?.usd || 0;
+const bnbPrice = prices.binancecoin?.usd || 0;
+const xrpPrice = prices.ripple?.usd || 0;
+const dogePrice = prices.dogecoin?.usd || 0;
+
+const priceMap = {
+  'vBTC': btcPrice, 'BTC': btcPrice,
+  'vETH': ethPrice, 'ETH': ethPrice,
+  'vSOL': solPrice, 'SOL': solPrice,
+  'vBNB': bnbPrice, 'BNB': bnbPrice,
+  'vXRP': xrpPrice, 'XRP': xrpPrice,
+  'vDOGE': dogePrice, 'DOGE': dogePrice,
+  'vUSDC': 1, 'USDC': 1, 'vUSDT': 1, 'USDT': 1
+};
+
+    // Calculate spot portfolio value
+    const spotPortfolio = balances.map(b => {
+  // Handle both vBTC and BTC style keys
+  const coinKey = b.coin;
+  const price = priceMap[coinKey] || priceMap[coinKey?.replace('v','')] || 1;
+  const total = parseFloat(b.total || 0);
+  const usdValue = total * price;
+  console.log(`${coinKey}: total=${total}, price=${price}, usdValue=${usdValue}`);
+  return {
+    coin: b.coin,
+    total: total,
+    locked: parseFloat(b.locked || 0),
+    available: total - parseFloat(b.locked || 0),
+    price,
+    usdValue: usdValue.toFixed(2)
+  };
+}).filter(b => b.total > 0);
+
+    const totalSpotValue = spotPortfolio.reduce((sum, b) => sum + parseFloat(b.usdValue), 0);
+
+    // Format futures positions
+    const futuresPositions = Array.isArray(positions) ? positions
+      .filter(p => parseFloat(p.size || p.quantity || 0) > 0)
+      .map(p => ({
+        symbol: p.symbol || p.symbolName,
+        side: p.side === 1 ? 'LONG' : 'SHORT',
+        size: parseFloat(p.size || p.quantity || 0),
+        entryPrice: parseFloat(p.entryPrice || p.avgPrice || 0),
+        markPrice: parseFloat(p.markPrice || 0),
+        unrealizedPnl: parseFloat(p.unrealizedPnl || p.unrealisedPnl || 0),
+        leverage: parseFloat(p.leverage || 1),
+        margin: parseFloat(p.margin || p.initialMargin || 0)
+      })) : [];
+
+    const totalPnl = futuresPositions.reduce((sum, p) => sum + p.unrealizedPnl, 0);
+
+    res.json({
+      spot: spotPortfolio,
+      futures: futuresPositions,
+      summary: {
+        totalSpotValue: totalSpotValue.toFixed(2),
+        totalPnl: totalPnl.toFixed(2),
+        totalValue: (totalSpotValue + totalPnl).toFixed(2),
+        positionCount: futuresPositions.length
+      }
+    });
+
+  } catch (e) {
+    console.error('Portfolio error:', e.message);
+    res.status(500).json({ error: 'Portfolio fetch failed' });
+  }
+});
+
+// Rule-based signal endpoint
+app.get('/api/signal/rules', async (req, res) => {
+  try {
+    const signal = await generateRuleBasedSignal();
+    if (!signal) return res.status(500).json({ error: 'Signal generation failed' });
+    res.json({ signal });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

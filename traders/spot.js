@@ -67,12 +67,16 @@ async function getSpotPrice(symbol = 'vBTC_vUSDC') {
 
 // symbol map
 const SYMBOL_MAP = {
-  'BTC': { symbolID: 1, ticker: 'vBTC_vUSDC', precision: 5 },
-  'ETH': { symbolID: 2, ticker: 'vETH_vUSDC', precision: 4 },
-  'SOL': { symbolID: 6, ticker: 'vSOL_vUSDC', precision: 3 },
-  'BNB': { symbolID: 9, ticker: 'vBNB_vUSDC', precision: 3 },
+  'BTC':  { symbolID: 1,  ticker: 'vBTC_vUSDC',  precision: 5 },
+  'ETH':  { symbolID: 2,  ticker: 'vETH_vUSDC',  precision: 4 },
+  'SOL':  { symbolID: 6,  ticker: 'vSOL_vUSDC',  precision: 3 },
+  'BNB':  { symbolID: 9,  ticker: 'vBNB_vUSDC',  precision: 3 },
+  'XRP':  { symbolID: 8,  ticker: 'vXRP_vUSDC',  precision: 1 },
+  'DOGE': { symbolID: 7,  ticker: 'vDOGE_vUSDC', precision: 0 },
+  'ADA':  { symbolID: 10, ticker: 'vADA_vUSDC',  precision: 1 },
+  'SOL':  { symbolID: 6,  ticker: 'vSOL_vUSDC',  precision: 3 },
+  'LINK': { symbolID: 5,  ticker: 'vLINK_vUSDC', precision: 1 },
 };
-
 async function placeSpotOrder({ asset = 'BTC', side, usdAmount, accountID, privateKey }) {
   try {
     const symbolInfo = SYMBOL_MAP[asset.toUpperCase()];

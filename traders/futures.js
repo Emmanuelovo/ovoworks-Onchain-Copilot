@@ -59,10 +59,13 @@ async function getFuturesBalance(walletAddress) {
 }
 
 const PERPS_SYMBOL_MAP = {
-  'BTC': { symbolID: 1, precision: 5, maxLeverage: 25 },
-  'ETH': { symbolID: 2, precision: 4, maxLeverage: 20 },
-  'SOL': { symbolID: 4, precision: 3, maxLeverage: 20 },
-  'DOGE': { symbolID: 5, precision: 0, maxLeverage: 10 },
+  'BTC':  { symbolID: 1,  precision: 5, maxLeverage: 25 },
+  'ETH':  { symbolID: 2,  precision: 4, maxLeverage: 20 },
+  'SOL':  { symbolID: 4,  precision: 3, maxLeverage: 20 },
+  'DOGE': { symbolID: 5,  precision: 0, maxLeverage: 10 },
+  'BNB':  { symbolID: 3,  precision: 3, maxLeverage: 10 },
+  'XRP':  { symbolID: 6,  precision: 1, maxLeverage: 10 },
+  'HYPE': { symbolID: 10, precision: 2, maxLeverage: 10 },
 };
 
 async function getPerpsAccountID(walletAddress) {
