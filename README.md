@@ -29,39 +29,6 @@ Ask it anything in plain English. It pulls live institutional ETF flow data from
 
 ---
 
-## 🏗️ Architecture
-Landing Page (index.html)
- Hero + Execution Loop Carousel
- How It Works
- Data Sources + SSI Indices
- For Judges — Workflow Guide
- Fee Calculator (SoDEX rates)
- Live Integrations Status
- Trader's Behavior + Charts
- Strategy Lab (Backtest + Agent Loop)
-
-OvoWorks Copilot (app.html)
- AI Chat — Claude Sonnet 4.6
- Live Signal Engine (AI + Rule-Based)
- SoDEX Spot Trading (8 pairs)
- SoDEX Futures Trading (25x leverage)
- ETF Flow Chart (14-day)
- Portfolio Tracker
- Signal History (MongoDB)
- Trade History (MongoDB)
-
-Backend (server.js)
- SoSoValue Terminal API
- CoinGecko API
- Anthropic Claude API
- SoDEX Spot API
- SoDEX Perps API
- Rule-Based Signal Engine
- ETF Flow Backtest Engine
- Agentic Monitor Loop (30min)
- MongoDB Atlas Persistence
----
-
 ## ✅ Features Shipped by Wave
 
 ### Wave 1 — Concept & Early Prototype
