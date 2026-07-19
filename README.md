@@ -39,6 +39,7 @@ Landing Page (index.html)
  Live Integrations Status
  Trader's Behavior + Charts
  Strategy Lab (Backtest + Agent Loop)
+
 OvoWorks Copilot (app.html)
  AI Chat — Claude Sonnet 4.6
  Live Signal Engine (AI + Rule-Based)
@@ -48,6 +49,7 @@ OvoWorks Copilot (app.html)
  Portfolio Tracker
  Signal History (MongoDB)
  Trade History (MongoDB)
+
 Backend (server.js)
  SoSoValue Terminal API
  CoinGecko API
